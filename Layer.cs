@@ -14,6 +14,8 @@ namespace ThirdYearProject
 
         public int NeuronCount;
 
+        public double[] Output;
+
         public Layer(int neuronCount, int inputCount, ActivationFunction function)
         {
             InputCount = inputCount;
@@ -25,16 +27,16 @@ namespace ThirdYearProject
             }
         }
 
-        public double[] Output(double[] input)
+        public double[] Update(double[] input)
         {
             double[] output = new double[NeuronCount];
 
-            for(int i = 0; i < NeuronCount; i++)
+            for (int i = 0; i < NeuronCount; i++)
             {
-                output[i] = Neurons[i].Output(input);
+                output[i] = Neurons[i].Update(input);
             }
 
-            return output;
+            return Output = output;
         }
     }
 }

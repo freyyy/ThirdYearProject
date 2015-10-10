@@ -8,6 +8,8 @@ namespace ThirdYearProject
 
         public double Threshold { set; get; }
 
+        public double Output;
+
         public ActivationFunction Function;
 
         public Neuron(int inputsCount, ActivationFunction function)
@@ -28,9 +30,9 @@ namespace ThirdYearProject
             return Utils.DotProduct(inputs, Weights) - Threshold;
         }
 
-        public double Output(double[] inputs)
+        public double Update(double[] input)
         {
-            return Function.Output(Activation(inputs));
+            return Output = Function.Output(Activation(input));
         }
     }
 }

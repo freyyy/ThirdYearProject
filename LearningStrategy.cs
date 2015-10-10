@@ -26,7 +26,7 @@ namespace ThirdYearProject
 
         public double Run(double[] inputs, double target)
         {
-            double output = Neuron.Output(inputs);
+            double output = Neuron.Update(inputs);
             double error = target - output;
 
             for(int i = 0; i < Neuron.Weights.Length; i++)
@@ -64,7 +64,7 @@ namespace ThirdYearProject
 
         public double Run(double[] inputs, double target)
         {
-            double output = Neuron.Output(inputs);
+            double output = Neuron.Update(inputs);
             double error = target - output;
             double deriv = Neuron.Function.Derivative(Neuron.Activation(inputs));
 

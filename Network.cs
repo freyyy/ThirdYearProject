@@ -10,21 +10,23 @@ namespace ThirdYearProject
     {
         public Layer[] Layers { set; get; }
 
+        public double[] Output;
+
         public Network(Layer[] layers)
         {
             Layers = layers;
         }
 
-        public double[] Output(double[] input)
+        public double[] Update(double[] input)
         {
             double[] output = input;
 
-            for(int i = 0; i < Layers.Length; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
-                output = Layers[i].Output(output);
+                output = Layers[i].Update(output);
             }
 
-            return output;
+            return Output = output;
         }
     }
 }
