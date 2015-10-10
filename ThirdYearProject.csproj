@@ -64,7 +64,9 @@
   <ItemGroup>
     <Compile Include="ActivationFunction.cs" />
     <Compile Include="Application.cs" />
+    <Compile Include="Layer.cs" />
     <Compile Include="LearningStrategy.cs" />
+    <Compile Include="Network.cs" />
     <Compile Include="Neuron.cs" />
     <Compile Include="ThresholdLogicUnits.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
