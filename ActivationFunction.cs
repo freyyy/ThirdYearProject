@@ -5,6 +5,7 @@ namespace ThirdYearProject
     public interface ActivationFunction {
         double Output(double input);
         double Derivative(double input);
+        double OutputDerivative(double input);
     }
 
     public class ThresholdFunction : ActivationFunction {
@@ -18,6 +19,11 @@ namespace ThirdYearProject
         }
 
         public double Derivative(double input)
+        {
+            return 1;
+        }
+
+        public double OutputDerivative(double input)
         {
             return 1;
         }
@@ -46,6 +52,11 @@ namespace ThirdYearProject
         {
             double output = Output(input);
             return output * (1 - output);
+        }
+
+        public double OutputDerivative(double input)
+        {
+            return input * (1 - input);
         }
     }
 }

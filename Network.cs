@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThirdYearProject
 {
-    class Network
+    public class Network
     {
         public Layer[] Layers { set; get; }
 

@@ -89,4 +89,95 @@ namespace ThirdYearProject
             return error;
         }
     }
+
+    public class BackpropagationLearning : LearningStrategy
+    {
+        public Network Network;
+
+        public double LearningRate;
+
+        public BackpropagationLearning(Network network, double learningRate)
+        {
+            Network = network;
+            LearningRate = learningRate;
+        }
+
+        private void PrintDeltas(double[][] delta)
+        {
+            for(int i = 0; i < delta.Length; i++)
+            {
+                for (int j = 0; j < delta[i].Length; j++)
+                {
+                    Console.Write(delta[i][j] + " ");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public double Run(double[] input, double target)
+        {
+            // Feed-forward - compute network output
+            double[] output = Network.Update(input);
+            double error = 0;
+
+            Layer[] layers = Network.Layers;
+            double[][] delta = new double[layers.Length][];
+
+            for(int i = 0; i < layers.Length; i++)
+            {
+                delta[i] = new double[layers[i].NeuronCount];
+            }
+
+            // Compute output layer deltas
+            for(int i = 0; i < layers[layers.Length - 1].NeuronCount; i++)
+            {
+                Neuron currentNeuron = layers[layers.Length - 1].Neurons[i];
+                error += Math.Abs(target - currentNeuron.Output);
+                delta[layers.Length - 1][i] = (target - currentNeuron.Output) * 
+                    currentNeuron.Function.OutputDerivative(currentNeuron.Output);
+            }
+
+            // Compute hidden layers deltas
+            for(int i = layers.Length - 2; i >= 0; i--)
+            {
+                for(int j = 0; j < layers[i].NeuronCount; j++)
+                {
+                    Neuron currentNeuron = layers[i].Neurons[j];
+                    for(int k = 0; k < layers[i + 1].NeuronCount; k++)
+                    {
+                        delta[i][j] += delta[i + 1][k] * layers[i + 1].Neurons[k].Weights[i];
+                    }
+                    delta[i][j] *= currentNeuron.Function.OutputDerivative(currentNeuron.Output);
+                }
+            }
+
+            // Update weights and thresholds
+            for(int i = 0; i < layers.Length; i++)
+            {
+                for(int j = 0; j < layers[i].NeuronCount; j++)
+                {
+                    for(int k = 0; k < layers[i].InputCount; k++)
+                    {
+                        layers[i].Neurons[j].Weights[k] += LearningRate * delta[i][j] * input[k];
+                    }
+                    layers[i].Neurons[j].Threshold += LearningRate * delta[i][j] * (-1);
+                }
+                input = layers[i].Output;
+            }
+
+            return error;
+        }
+
+        public double RunEpoch(double[][] inputs, double[] targets)
+        {
+            double error = 0;
+
+            for (int i = 0; i < inputs.Length; i++)
+            {
+                error += Run(inputs[i], targets[i]);
+            }
+
+            return error;
+        }
+    }
 }

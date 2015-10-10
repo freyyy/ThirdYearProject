@@ -6,23 +6,33 @@ namespace ThirdYearProject
     {
         public static void Main()
         {
-            double[][] inputs = { new double[] { 0 }, new double[] { 1 } };
-            double[] targets = { 0, 1 };
-            double error = 100;
-            double errorDelta = 100;
+            double[][] inputs = { new double[] { 0, 0 }, new double[] { 0, 1 }, new double[] { 1, 0 }, new double[] { 1, 1 } };
+            double[] targets = { 0, 1, 1, 0 };
+            double error = 1;
 
             ActivationFunction f = new SigmoidFunction();
-            Neuron neuron = new Neuron(1, f);
-            LearningStrategy strategy = new DeltaRuleLearning(neuron, 0.1);
+            Layer layer1 = new Layer(2, 2, f);
+            Layer layer2 = new Layer(1, 2, f);
+            Network network = new Network(new Layer[] { layer1, layer2 });
 
+            layer1.Neurons[0].Weights = new double[] { 0.2, 0.3 };
+            layer1.Neurons[1].Weights = new double[] { 0.3, 0.4 };
+            layer2.Neurons[0].Weights = new double[] { 0.5, 0.5 };
+            layer1.Neurons[0].Threshold = 0.4;
+            layer1.Neurons[1].Threshold = 0.2;
+            layer2.Neurons[0].Threshold = 0.8;
+
+            LearningStrategy learning = new BackpropagationLearning(network, 0.1);
+            
             while(error > 0.1)
             {
-                double oldError = error;
-                error = strategy.RunEpoch(inputs, targets) / 2;
+                error = learning.RunEpoch(inputs, targets) / 4;
+                Console.WriteLine(error);
             }
-            Console.WriteLine(error);
-            Console.WriteLine(neuron.Weights[0]);
-            Console.WriteLine(neuron.Threshold);
+            Console.WriteLine(network.Update(new double[] { 0, 0 })[0]);
+            Console.WriteLine(network.Update(new double[] { 0, 1 })[0]);
+            Console.WriteLine(network.Update(new double[] { 1, 0 })[0]);
+            Console.WriteLine(network.Update(new double[] { 1, 1 })[0]);
         }
     } 
 }

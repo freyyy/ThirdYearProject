@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThirdYearProject
 {
-    class Layer
+    public class Layer
     {
         public Neuron[] Neurons { set; get; }
 
