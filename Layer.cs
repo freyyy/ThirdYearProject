@@ -25,13 +25,13 @@ namespace ThirdYearProject
             }
         }
 
-        public double[] Output(double[] inputs)
+        public double[] Output(double[] input)
         {
             double[] output = new double[NeuronCount];
 
             for(int i = 0; i < NeuronCount; i++)
             {
-                output[i] = Neurons[i].Output(inputs);
+                output[i] = Neurons[i].Output(input);
             }
 
             return output;
