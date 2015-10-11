@@ -8,25 +8,43 @@ namespace ThirdYearProject
 {
     public class Network
     {
-        public Layer[] Layers { set; get; }
+        private Layer[] _layers;
 
-        public double[] Output;
+        private double[] _output;
+
+        private int _layerCount;
 
         public Network(Layer[] layers)
         {
-            Layers = layers;
+            _layers = layers;
+            _layerCount = layers.Length;
+        }
+
+        public Layer this[int i]
+        {
+            get { return _layers[i]; }
+        }
+
+        public int LayerCount
+        {
+            get { return _layerCount; }
+        }
+
+        public double[] Output
+        {
+            get { return _output; }
         }
 
         public double[] Update(double[] input)
         {
             double[] output = input;
 
-            for (int i = 0; i < Layers.Length; i++)
+            for (int i = 0; i < _layers.Length; i++)
             {
-                output = Layers[i].Update(output);
+                output = _layers[i].Update(output);
             }
 
-            return Output = output;
+            return _output = output;
         }
     }
 }
