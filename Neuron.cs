@@ -4,35 +4,65 @@ namespace ThirdYearProject
 {
     public class Neuron
     {
-        public double[] Weights { set; get; }
+        private double[] _weights;
 
-        public double Threshold { set; get; }
+        private double _threshold;
 
-        public double Output;
+        private double _output;
 
-        public ActivationFunction Function;
+        private int _inputCount;
 
-        public Neuron(int inputsCount, ActivationFunction function)
+        private ActivationFunction _function;
+
+        public Neuron(int inputCount, ActivationFunction function)
         {
-            Weights = new double[inputsCount];
-            Threshold = 0.5;
-            Function = function;
+            _weights = new double[inputCount];
+            _inputCount = inputCount;
+            _threshold = 0.5;
+            _function = function;
 
             Random rnd = new Random();
-            for(int i = 0; i < inputsCount; i++)
+            for(int i = 0; i < inputCount; i++)
             {
-                Weights[i] = (double) rnd.Next(0, 10) / 10;
+                _weights[i] = (double) rnd.Next(0, 10) / 10;
             }
         }
 
-        public double Activation(double[] inputs)
+        public double this[int i]
         {
-            return Utils.DotProduct(inputs, Weights) - Threshold;
+            get { return _weights[i]; }
+            set { _weights[i] = value; }
+        }
+
+        public double Threshold
+        {
+            get { return _threshold; }
+            set { _threshold = value; }
+        }
+
+        public double InputCount
+        {
+            get { return _inputCount; }
+        }
+
+        public double Output
+        {
+            get { return _output; }
+        }
+
+        public ActivationFunction Function
+        {
+            get { return _function; }
+        }
+
+        public double Activation(double[] input)
+        {
+            return Utils.DotProduct(input, _weights) - _threshold;
         }
 
         public double Update(double[] input)
         {
-            return Output = Function.Output(Activation(input));
+            return _output = _function.Output(Activation(input));
         }
     }
 }
