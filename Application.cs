@@ -15,12 +15,15 @@ namespace ThirdYearProject
             Layer layer2 = new Layer(1, 2, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
 
-            layer1.Neurons[0].Weights = new double[] { 0.2, 0.3 };
-            layer1.Neurons[1].Weights = new double[] { 0.3, 0.4 };
-            layer2.Neurons[0].Weights = new double[] { 0.5, 0.5 };
-            layer1.Neurons[0].Threshold = 0.4;
-            layer1.Neurons[1].Threshold = 0.2;
-            layer2.Neurons[0].Threshold = 0.8;
+            layer1[0][0] = 0.2;
+            layer1[0][1] = 0.3;
+            layer1[1][0] = 0.3;
+            layer1[1][1] = 0.4;
+            layer2[0][0] = 0.5;
+            layer2[0][1] = 0.5;
+            layer1[0].Threshold = 0.4;
+            layer1[1].Threshold = 0.2;
+            layer2[0].Threshold = 0.8;
 
             LearningStrategy learning = new BackpropagationLearning(network, 0.1);
             
