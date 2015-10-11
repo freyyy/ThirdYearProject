@@ -117,28 +117,30 @@ namespace ThirdYearProject
         public double Run(double[] input, double target)
         {
             // Feed-forward - compute network output
-            double[] output = Network.Update(input);
-            double error = 0;
+            Network.Update(input);
 
             Layer[] layers = Network.Layers;
-            double[][] delta = new double[layers.Length][];
+            int layerCount = layers.Length;
+            double error = 0;
+            
+            double[][] delta = new double[layerCount][];
 
-            for(int i = 0; i < layers.Length; i++)
+            for(int i = 0; i < layerCount; i++)
             {
                 delta[i] = new double[layers[i].NeuronCount];
             }
 
             // Compute output layer deltas
-            for(int i = 0; i < layers[layers.Length - 1].NeuronCount; i++)
+            for(int i = 0; i < layers[layerCount - 1].NeuronCount; i++)
             {
-                Neuron currentNeuron = layers[layers.Length - 1].Neurons[i];
+                Neuron currentNeuron = layers[layerCount - 1].Neurons[i];
                 error += Math.Abs(target - currentNeuron.Output);
-                delta[layers.Length - 1][i] = (target - currentNeuron.Output) * 
+                delta[layerCount - 1][i] = (target - currentNeuron.Output) * 
                     currentNeuron.Function.OutputDerivative(currentNeuron.Output);
             }
 
             // Compute hidden layers deltas
-            for(int i = layers.Length - 2; i >= 0; i--)
+            for(int i = layerCount - 2; i >= 0; i--)
             {
                 for(int j = 0; j < layers[i].NeuronCount; j++)
                 {
@@ -152,7 +154,7 @@ namespace ThirdYearProject
             }
 
             // Update weights and thresholds
-            for(int i = 0; i < layers.Length; i++)
+            for(int i = 0; i < layerCount; i++)
             {
                 for(int j = 0; j < layers[i].NeuronCount; j++)
                 {
