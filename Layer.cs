@@ -8,23 +8,44 @@ namespace ThirdYearProject
 {
     public class Layer
     {
-        public Neuron[] Neurons { set; get; }
+        private Neuron[] _neurons;
 
-        public int InputCount;
+        private int _inputCount;
 
-        public int NeuronCount;
+        private int _neuronCount;
 
-        public double[] Output;
+        private double[] _output;
 
         public Layer(int neuronCount, int inputCount, ActivationFunction function)
         {
-            InputCount = inputCount;
-            NeuronCount = neuronCount;
-            Neurons = new Neuron[neuronCount];
+            _inputCount = inputCount;
+            _neuronCount = neuronCount;
+
+            _neurons = new Neuron[neuronCount];
             for(int i = 0; i < neuronCount; i++)
             {
-                Neurons[i] = new Neuron(inputCount, function);
+                _neurons[i] = new Neuron(inputCount, function);
             }
+        }
+
+        public Neuron this[int i]
+        {
+            get { return _neurons[i]; }
+        }
+
+        public int InputCount
+        {
+            get { return _inputCount; }
+        }
+
+        public int NeuronCount
+        {
+            get { return _neuronCount; }
+        }
+
+        public double[] Output
+        {
+            get { return _output; }
         }
 
         public double[] Update(double[] input)
@@ -33,10 +54,10 @@ namespace ThirdYearProject
 
             for (int i = 0; i < NeuronCount; i++)
             {
-                output[i] = Neurons[i].Update(input);
+                output[i] = _neurons[i].Update(input);
             }
 
-            return Output = output;
+            return _output = output;
         }
     }
 }
