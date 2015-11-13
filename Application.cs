@@ -29,7 +29,7 @@ namespace ThirdYearProject
             
             while(error > 0.1)
             {
-                error = learning.RunEpoch(inputs, targets) / 4;
+                error = learning.RunEpoch(inputs, targets);
                 Console.WriteLine(error);
             }
             Console.WriteLine(network.Update(new double[] { 0, 0 })[0]);
