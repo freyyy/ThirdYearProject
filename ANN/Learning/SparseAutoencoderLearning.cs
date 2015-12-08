@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ANN.Core;
+using ANN.Utils;
 
 namespace ANN.Learning
 {
@@ -88,12 +89,45 @@ namespace ANN.Learning
                 {
                     inputCount = _network[i][j].InputCount;
 
-                    for(int k = 0; k < inputCount; k++)
+                    for (int k = 0; k < inputCount; k++)
                     {
                         partialDerivatives[i][j][k] = deltas[i][j] * input[k];
                     }
                 }
                 input = _network[i].Output;
+            }
+
+            return partialDerivatives;
+        }
+
+        public double[][][] ComputeBatchPartialDerivatives(double[][] input, double[][] target)
+        {
+            int layerCount = Network.LayerCount;
+            int neuronCount, inputCount;
+            double[][][] partialDerivatives = new double[layerCount][][];
+            double[][] deltas;
+            double[][][] tmpPartialDerivatives;
+
+            for (int i = 0; i < layerCount; i++)
+            {
+                neuronCount = _network[i].NeuronCount;
+                partialDerivatives[i] = new double[neuronCount][];
+
+                for (int j = 0; j < neuronCount; j++)
+                {
+                    inputCount = _network[i][j].InputCount;
+                    partialDerivatives[i][j] = new double[inputCount];
+                }
+            }
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                _network.Update(input[i]);
+
+                deltas = ComputeDeltas(target[i]);
+                tmpPartialDerivatives = ComputePartialDerivatives(deltas, input[i]);
+
+                partialDerivatives = Matrix.AddMatrices(partialDerivatives, tmpPartialDerivatives);
             }
 
             return partialDerivatives;

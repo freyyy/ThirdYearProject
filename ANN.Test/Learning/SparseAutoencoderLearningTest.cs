@@ -169,5 +169,74 @@ namespace ANN.Test.Learning
             Assert.AreEqual(gradient[1][0][0], partialDerivatives[1][0][0], 0.0001, "Gradient checking failed");
             Assert.AreEqual(gradient[1][0][1], partialDerivatives[1][0][1], 0.0001, "Gradient checking failed");
         }
+
+        [TestMethod]
+        public void SparseAutoencoder_BatchGradientChecking()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
+            double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
+            double[][][] gradient = new double[][][]
+            {
+                new double[][]
+                {
+                    new double[] { 0, 0 },
+                    new double[] { 0, 0 }
+                },
+                new double[][]
+                {
+                    new double[] { 0, 0 }
+                }
+            };
+
+            layers[0][0][0] = 0.1;
+            layers[0][0][1] = 0.2;
+            layers[0][1][0] = 0.3;
+            layers[0][1][1] = 0.4;
+            layers[1][0][0] = 0.5;
+            layers[1][0][1] = 0.5;
+            layers[0][0].Threshold = 0.01;
+            layers[0][1].Threshold = 0.02;
+            layers[1][0].Threshold = 0.05;
+
+            for (int i = 0; i < network.LayerCount; i++)
+            {
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    for (int k = 0; k < network[i][j].InputCount; k++)
+                    {
+                        double tmp = network[i][j][k];
+                        network[i][j][k] = tmp + 0.0001;
+
+                        for (int l = 0; l < input.Length; l++)
+                        {
+                            gradient[i][j][k] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                        }
+
+                        network[i][j][k] = tmp - 0.0001;
+
+                        for (int l = 0; l < input.Length; l++)
+                        {
+                            gradient[i][j][k] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                        }
+
+                        network[i][j][k] = tmp;
+                        gradient[i][j][k] = gradient[i][j][k] / 0.0002;
+                    }
+                }
+            }
+
+            double[][][] partialDerivatives = sparseAutoencoder.ComputeBatchPartialDerivatives(input, target);
+
+            Assert.AreEqual(gradient[0][0][0], ((double)1 / input.Length) * partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradient[0][0][1], ((double)1 / input.Length) * partialDerivatives[0][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradient[0][1][0], ((double)1 / input.Length) * partialDerivatives[0][1][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradient[0][1][1], ((double)1 / input.Length) * partialDerivatives[0][1][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradient[1][0][0], ((double)1 / input.Length) * partialDerivatives[1][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradient[1][0][1], ((double)1 / input.Length) * partialDerivatives[1][0][1], 0.0001, "Gradient checking failed");
+        }
     }
 }
