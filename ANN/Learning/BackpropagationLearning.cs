@@ -1,5 +1,6 @@
 ﻿using System;
 using ANN.Core;
+using ANN.Function;
 
 namespace ANN.Learning
 {
@@ -25,6 +26,13 @@ namespace ANN.Learning
                 }
                 Console.WriteLine();
             }
+        }
+
+        private double[][] ApproximatePartialDerivatives(Network network, double[] target)
+        {
+            double[][] derivatives = new double[network.LayerCount][];
+
+            return new double[][] { new double[] { 0, 0 }, new double[] { 0, 0 } };
         }
 
         public double Run(double[] input, double target)
