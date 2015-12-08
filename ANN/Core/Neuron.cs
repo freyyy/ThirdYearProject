@@ -42,7 +42,7 @@ namespace ANN.Core
             set { _threshold = value; }
         }
 
-        public double InputCount
+        public int InputCount
         {
             get { return _inputCount; }
         }
