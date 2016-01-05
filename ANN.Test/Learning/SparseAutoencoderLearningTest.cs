@@ -10,6 +10,49 @@ namespace ANN.Test.Learning
     public class SparseAutoencoderLearningTest
     {
         [TestMethod]
+        public void SparseAutoencoderConstructor_InitialisesCache()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(4, 5, sigmoidFunction), new Layer(3, 4, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+
+            int batchSize = sparseAutoencoder.BatchSize;
+            double[][][] cachedActivations = sparseAutoencoder.CachedActivations;
+
+            Assert.AreEqual(1, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
+            
+            for (int i = 0; i < batchSize; i++)
+            {
+                Assert.AreEqual(network.LayerCount, cachedActivations[i].Length);
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    Assert.AreEqual(network[j].NeuronCount, cachedActivations[i][j].Length);
+                }
+            }
+
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32);
+
+            batchSize = sparseAutoencoder.BatchSize;
+            cachedActivations = sparseAutoencoder.CachedActivations;
+
+            Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                Assert.AreEqual(network.LayerCount, cachedActivations[i].Length);
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    Assert.AreEqual(network[j].NeuronCount, cachedActivations[i][j].Length);
+                }
+            }
+        }
+
+        [TestMethod]
         public void SparseAutoencoderOutputLayerDeltas_ReturnsDeltas()
         {
             ActivationFunction sigmoidFunction = new SigmoidFunction();

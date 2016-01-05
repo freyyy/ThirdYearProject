@@ -11,11 +11,30 @@ namespace ANN.Learning
     public class SparseAutoencoderLearning
     {
         private Network _network;
+        private int _batchSize;
+        private double[][][] _cachedActivations;
 
-        public SparseAutoencoderLearning(Network network)
+        public SparseAutoencoderLearning(Network network) : this(network, 1) { }
+
+        public SparseAutoencoderLearning(Network network, int batchSize)
         {
             _network = network;
+            _batchSize = batchSize;
+
+            _cachedActivations = new double[batchSize][][];
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                _cachedActivations[i] = new double[network.LayerCount][];
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    _cachedActivations[i][j] = new double[network[j].NeuronCount];
+                }
+            }
         }
+
+
 
         public double[] OutputLayerDeltas(double[] target)
         {
@@ -136,6 +155,16 @@ namespace ANN.Learning
         public Network Network
         {
             get { return _network; }
+        }
+
+        public int BatchSize
+        {
+            get { return _batchSize; }
+        }
+
+        public double[][][] CachedActivations
+        {
+            get { return _cachedActivations;  }
         }
     }
 }
