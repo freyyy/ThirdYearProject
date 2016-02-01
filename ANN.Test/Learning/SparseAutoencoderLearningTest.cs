@@ -53,6 +53,80 @@ namespace ANN.Test.Learning
         }
 
         [TestMethod]
+        public void SparseAutoencoderUpdateCachedActivations_UpdatesCache()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
+            double[][][] expected = new double[][][]
+            {
+                new double[][]
+                {
+                    new double[] { 0.539914884556, 0.591458978433 },
+                    new double[] { 0.626138674824 }
+                },
+                new double[][]
+                {
+                    new double[] { 0.547357618143, 0.608259030747 },
+                    new double[] { 0.628971793540 }
+                }
+            };
+
+            layers[0][0][0] = 0.1;
+            layers[0][0][1] = 0.2;
+            layers[0][1][0] = 0.3;
+            layers[0][1][1] = 0.4;
+            layers[1][0][0] = 0.5;
+            layers[1][0][1] = 0.5;
+            layers[0][0].Threshold = 0.01;
+            layers[0][1].Threshold = 0.02;
+            layers[1][0].Threshold = 0.05;
+
+            double[][][] cachedActivations = sparseAutoencoder.UpdateCachedActivations(input);
+
+            Assert.AreEqual(expected[0][0][0], cachedActivations[0][0][0], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[0][0][1], cachedActivations[0][0][1], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[0][1][0], cachedActivations[0][1][0], 0.0001, "Invalid cached activation value");
+
+            input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.6, 0.7 } };
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 2);
+
+            cachedActivations = sparseAutoencoder.UpdateCachedActivations(input);
+
+            Assert.AreEqual(expected[0][0][0], cachedActivations[0][0][0], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[0][0][1], cachedActivations[0][0][1], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[0][1][0], cachedActivations[0][1][0], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[1][0][0], cachedActivations[1][0][0], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[1][0][1], cachedActivations[1][0][1], 0.0001, "Invalid cached activation value");
+            Assert.AreEqual(expected[1][1][0], cachedActivations[1][1][0], 0.0001, "Invalid cached activation value");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void SparseAutoencoderUpdateCachedActivations_ThrowsArgument()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 2);
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
+
+            layers[0][0][0] = 0.1;
+            layers[0][0][1] = 0.2;
+            layers[0][1][0] = 0.3;
+            layers[0][1][1] = 0.4;
+            layers[1][0][0] = 0.5;
+            layers[1][0][1] = 0.5;
+            layers[0][0].Threshold = 0.01;
+            layers[0][1].Threshold = 0.02;
+            layers[1][0].Threshold = 0.05;
+
+            double[][][] cachedActivations = sparseAutoencoder.UpdateCachedActivations(input);
+        }
+
+        [TestMethod]
         public void SparseAutoencoderOutputLayerDeltas_ReturnsDeltas()
         {
             ActivationFunction sigmoidFunction = new SigmoidFunction();
@@ -87,8 +161,11 @@ namespace ANN.Test.Learning
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
             double[] input = new double[] { 0.5, 0.6 };
             double[] target = new double[] { 1 };
-            double[][] expected = new double[][] { new double[] { -0.0108698887658827, -0.0105735765912387 },
-                new double[] { -0.0875168367272141 } };
+            double[][] expected = new double[][]
+            {
+                new double[] { -0.0108698887658827, -0.0105735765912387 },
+                new double[] { -0.0875168367272141 }
+            };
 
             layers[0][0][0] = 0.1;
             layers[0][0][1] = 0.2;

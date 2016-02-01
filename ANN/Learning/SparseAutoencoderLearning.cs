@@ -34,7 +34,28 @@ namespace ANN.Learning
             }
         }
 
+        public double[][][] UpdateCachedActivations(double[][] input)
+        {
+            if (input.Length != _batchSize)
+            {
+                throw new ArgumentException("Input size must match the batch size exactly.");
+            }
 
+            for (int i = 0; i < input.Length; i++)
+            {
+                _network.Update(input[i]);
+
+                for (int j = 0; j < _network.LayerCount; j++)
+                {
+                    for (int k = 0; k < _network[j].NeuronCount; k++)
+                    {
+                        _cachedActivations[i][j][k] = _network[j][k].Output;
+                    }
+                }
+            }
+
+            return _cachedActivations;
+        }
 
         public double[] OutputLayerDeltas(double[] target)
         {
