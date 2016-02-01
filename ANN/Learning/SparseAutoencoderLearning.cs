@@ -65,11 +65,11 @@ namespace ANN.Learning
             return deltas;
         }
 
-        public double[][] ComputeDeltas(double[] target)
+        public double[][] ComputeDeltas(int batchIndex, double[] target)
         {
             int layerCount = _network.LayerCount;
             double[][] deltas = new double[layerCount][];
-            double[] output = _network[layerCount - 1].Output;
+            double[] output = _cachedActivations[batchIndex][layerCount - 1];
 
             if (target.Length != _network[layerCount - 1].NeuronCount)
             {
@@ -90,7 +90,7 @@ namespace ANN.Learning
 
                 for (int j = 0; j < _network[i].NeuronCount; j++)
                 {
-                    double neuronOutput = _network[i][j].Output;
+                    double neuronOutput = _cachedActivations[batchIndex][i][j];
 
                     for (int k = 0; k < weights.Length; k++)
                     {
@@ -103,7 +103,7 @@ namespace ANN.Learning
             return deltas;
         }
 
-        public double[][][] ComputePartialDerivatives(double[][] deltas, double[] input)
+        public double[][][] ComputePartialDerivatives(int batchIndex, double[][] deltas, double[] input)
         {
             int layerCount = Network.LayerCount;
             int neuronCount, inputCount;
@@ -134,7 +134,7 @@ namespace ANN.Learning
                         partialDerivatives[i][j][k] = deltas[i][j] * input[k];
                     }
                 }
-                input = _network[i].Output;
+                input = _cachedActivations[batchIndex][i];
             }
 
             return partialDerivatives;
@@ -160,12 +160,12 @@ namespace ANN.Learning
                 }
             }
 
+            UpdateCachedActivations(input);
+
             for (int i = 0; i < input.Length; i++)
             {
-                _network.Update(input[i]);
-
-                deltas = ComputeDeltas(target[i]);
-                tmpPartialDerivatives = ComputePartialDerivatives(deltas, input[i]);
+                deltas = ComputeDeltas(i, target[i]);
+                tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
 
                 partialDerivatives = Matrix.AddMatrices(partialDerivatives, tmpPartialDerivatives);
             }

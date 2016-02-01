@@ -159,8 +159,8 @@ namespace ANN.Test.Learning
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
-            double[] input = new double[] { 0.5, 0.6 };
-            double[] target = new double[] { 1 };
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
+            double[][] target = new double[][] { new double[] { 1 } };
             double[][] expected = new double[][]
             {
                 new double[] { -0.0108698887658827, -0.0105735765912387 },
@@ -177,8 +177,8 @@ namespace ANN.Test.Learning
             layers[0][1].Threshold = 0.02;
             layers[1][0].Threshold = 0.05;
 
-            network.Update(input);
-            double[][] actual = sparseAutoencoder.ComputeDeltas(target);
+            sparseAutoencoder.UpdateCachedActivations(input);
+            double[][] actual = sparseAutoencoder.ComputeDeltas(0, target[0]);
             Assert.AreEqual(expected[0][0], actual[0][0], 0.0001, "Invalid deltas");
             Assert.AreEqual(expected[0][1], actual[0][1], 0.0001, "Invalid deltas");
             Assert.AreEqual(expected[1][0], actual[1][0], 0.0001, "Invalid deltas");
@@ -191,8 +191,8 @@ namespace ANN.Test.Learning
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
-            double[] input = new double[] { 0.5, 0.6 };
-            double[] target = new double[] { 1 };
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
+            double[][] target = new double[][] { new double[] { 1 } };
             double[][][] expected = new double[][][]
             {
                 new double[][]
@@ -217,9 +217,9 @@ namespace ANN.Test.Learning
             layers[0][1].Threshold = 0.02;
             layers[1][0].Threshold = 0.05;
 
-            network.Update(input);
-            double[][] deltas = sparseAutoencoder.ComputeDeltas(target);
-            double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(deltas, input);
+            sparseAutoencoder.UpdateCachedActivations(input);
+            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);
+            double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(0, deltas, input[0]);
 
             Assert.AreEqual(expected[0][0][0], partialDerivatives[0][0][0], 0.0001, "Invalid partial derivative");
             Assert.AreEqual(expected[0][0][1], partialDerivatives[0][0][1], 0.0001, "Invalid partial derivative");
@@ -236,8 +236,8 @@ namespace ANN.Test.Learning
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
-            double[] input = new double[] { 0.5, 0.6 };
-            double[] target = new double[] { 1 };
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
+            double[][] target = new double[][] { new double[] { 1 } };
             double[][][] gradient = new double[][][]
             {
                 new double[][]
@@ -269,18 +269,18 @@ namespace ANN.Test.Learning
                     {
                         double tmp = network[i][j][k];
                         network[i][j][k] = tmp + 0.0001;
-                        gradient[i][j][k] += Math.Pow(network.Update(input)[0] - target[0], 2);
+                        gradient[i][j][k] += Math.Pow(network.Update(input[0])[0] - target[0][0], 2);
                         network[i][j][k] = tmp - 0.0001;
-                        gradient[i][j][k] -= Math.Pow(network.Update(input)[0] - target[0], 2);
+                        gradient[i][j][k] -= Math.Pow(network.Update(input[0])[0] - target[0][0], 2);
                         network[i][j][k] = tmp;
                         gradient[i][j][k]  = 0.5 * gradient[i][j][k] / 0.0002;
                     }
                 }
             }
 
-            network.Update(input);
-            double[][] deltas = sparseAutoencoder.ComputeDeltas(target);
-            double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(deltas, input);
+            sparseAutoencoder.UpdateCachedActivations(input);
+            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);
+            double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(0, deltas, input[0]);
 
             Assert.AreEqual(gradient[0][0][0], partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
             Assert.AreEqual(gradient[0][0][1], partialDerivatives[0][0][1], 0.0001, "Gradient checking failed");
@@ -296,7 +296,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
             double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
             double[][][] gradient = new double[][][]
