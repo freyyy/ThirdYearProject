@@ -8,26 +8,74 @@ namespace ANN.Test.Utils
     public class MatrixTest
     {
         [TestMethod]
-        public void MatrixAdd_WithValidMatrices_ReturnsResult()
+        public void MatrixAdd2d_WithValidMatrices_ReturnsResult()
         {
-            double[][][] matrix1 = new double[][][] {
-                new double[][] {
+            double[][] matrix1 = new double[][]
+            {
+                new double[] { 0, 1 },
+                new double[] { 2, 3, 4 },
+                new double[] { 5 }
+            };
+            double[][] matrix2 = new double[][]
+            {
+                new double[] { 5, 4 },
+                new double[] { 3, 2, 1 },
+                new double[] { 0 }
+            };
+            double[][] expected = new double[][]
+            {
+                new double[] { 5, 5 },
+                new double[] { 5, 5, 5 },
+                new double[] { 5 }
+            };
+
+            double[][] actual = Matrix.AddMatrices(matrix1, matrix2);
+
+            for (int i = 0; i < actual.Length; i++)
+            {
+                CollectionAssert.AreEqual(expected[i], actual[i], "Incorrect matrix addition");
+            }
+        }
+
+        [TestMethod]
+        public void MatrixAdd3d_WithValidMatrices_ReturnsResult()
+        {
+            double[][][] matrix1 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 0, 1 },
-                    new double[] { 2, 3, 4 } },
-                new double[][] {
-                    new double[] { 5 } } };
-            double[][][] matrix2 = new double[][][] {
-                new double[][] {
+                    new double[] { 2, 3, 4 }
+                },
+                new double[][]
+                {
+                    new double[] { 5 }
+                }
+            };
+            double[][][] matrix2 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 5, 4 },
-                    new double[] { 3, 2, 1 } },
-                new double[][] {
-                    new double[] { 0 } } };
-            double[][][] expected = new double[][][] {
-                new double[][] {
+                    new double[] { 3, 2, 1 }
+                },
+                new double[][]
+                {
+                    new double[] { 0 }
+                }
+            };
+            double[][][] expected = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 5, 5 },
-                    new double[] { 5, 5, 5 } },
-                new double[][] {
-                    new double[] { 5 } } };
+                    new double[] { 5, 5, 5 }
+                },
+                new double[][]
+                {
+                    new double[] { 5 }
+                }
+            };
 
             double[][][] actual = Matrix.AddMatrices(matrix1, matrix2);
 
@@ -42,74 +90,127 @@ namespace ANN.Test.Utils
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void MatrixAdd_WithInvalidMatricesFirst_ThrowsArgument()
+        public void MatrixAdd2d_WithInvalidMatricesFirst_ThrowsArgument()
         {
-            double[][][] matrix1 = new double[][][] {
-                new double[][] {
+            double[][] matrix1 = new double[][]
+            {
+                new double[] { 0, 1 },
+                new double[] { 2, 3, 4 },
+                new double[] { 5 }
+            };
+            double[][] matrix2 = new double[][]
+            {
+                new double[] { 5 }
+            };
+
+            double[][] actual = Matrix.AddMatrices(matrix1, matrix2);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void MatrixAdd3d_WithInvalidMatricesFirst_ThrowsArgument()
+        {
+            double[][][] matrix1 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 0, 1 },
-                    new double[] { 2, 3, 4 } },
-                new double[][] {
-                    new double[] { 5 } } };
-            double[][][] matrix2 = new double[][][] {
-                new double[][] {
-                    new double[] { 3, 2, 1} } };
-            double[][][] expected = new double[][][] {
-                new double[][] {
-                    new double[] { 5, 5 },
-                    new double[] { 5, 5, 5 } },
-                new double[][] {
-                    new double[] { 5 } } };
+                    new double[] { 2, 3, 4 }
+                },
+                new double[][]
+                {
+                    new double[] { 5 } }
+            };
+            double[][][] matrix2 = new double[][][]
+            {
+                new double[][]
+                {
+                    new double[] { 3, 2, 1}
+                }
+            };
 
             double[][][] actual = Matrix.AddMatrices(matrix1, matrix2);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void MatrixAdd_WithInvalidMatricesSecond_ThrowsArgument()
+        public void MatrixAdd2d_WithInvalidMatricesSecond_ThrowsArgument()
         {
-            double[][][] matrix1 = new double[][][] {
-                new double[][] {
+            double[][] matrix1 = new double[][]
+            {
+                new double[] { 0, 1 },
+                new double[] { 2, 3, 4 },
+                new double[] { 5 }
+            };
+            double[][] matrix2 = new double[][]
+            {
+                new double[] { 5, 4 },
+                new double[] { 3, 2 },
+                new double[] { 0 }
+            };
+
+            double[][] actual = Matrix.AddMatrices(matrix1, matrix2);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void MatrixAdd3d_WithInvalidMatricesSecond_ThrowsArgument()
+        {
+            double[][][] matrix1 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 0, 1 },
-                    new double[] { 2, 3, 4 } },
-                new double[][] {
-                    new double[] { 5 } } };
-            double[][][] matrix2 = new double[][][] {
-                new double[][] {
-                    new double[] { 3, 2, 1} },
-                new double[][] {
-                    new double[] { 0 } } };
-            double[][][] expected = new double[][][] {
-                new double[][] {
-                    new double[] { 5, 5 },
-                    new double[] { 5, 5, 5 } },
-                new double[][] {
-                    new double[] { 5 } } };
+                    new double[] { 2, 3, 4 }
+                },
+                new double[][]
+                {
+                    new double[] { 5 }
+                }
+            };
+            double[][][] matrix2 = new double[][][]
+            {
+                new double[][]
+                {
+                    new double[] { 3, 2, 1}
+                },
+                new double[][]
+                {
+                    new double[] { 0 }
+                }
+            };
 
             double[][][] actual = Matrix.AddMatrices(matrix1, matrix2);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void MatrixAdd_WithInvalidMatricesThird_ThrowsArgument()
+        public void MatrixAdd3d_WithInvalidMatricesThird_ThrowsArgument()
         {
-            double[][][] matrix1 = new double[][][] {
-                new double[][] {
+            double[][][] matrix1 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 0, 1 },
-                    new double[] { 2, 3, 4 } },
-                new double[][] {
-                    new double[] { 5 } } };
-            double[][][] matrix2 = new double[][][] {
-                new double[][] {
+                    new double[] { 2, 3, 4 }
+                },
+                new double[][]
+                {
+                    new double[] { 5 }
+                }
+            };
+            double[][][] matrix2 = new double[][][]
+            {
+                new double[][]
+                {
                     new double[] { 5, 4 },
-                    new double[] { 3, 2} },
-                new double[][] {
-                    new double[] { 0 } } };
-            double[][][] expected = new double[][][] {
-                new double[][] {
-                    new double[] { 5, 5 },
-                    new double[] { 5, 5, 5 } },
-                new double[][] {
-                    new double[] { 5 } } };
+                    new double[] { 3, 2}
+                },
+                new double[][]
+                {
+                    new double[] { 0 }
+                }
+            };
 
             double[][][] actual = Matrix.AddMatrices(matrix1, matrix2);
         }

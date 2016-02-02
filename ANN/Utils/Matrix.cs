@@ -49,5 +49,33 @@ namespace ANN.Utils
 
             return result;
         }
+
+        public static double[][] AddMatrices(double[][] xs, double[][] ys)
+        {
+            double[][] result = xs.Select(x => x.ToArray()).ToArray();
+
+            if (xs.Length != ys.Length)
+            {
+                throw new ArgumentException("Matrices must have same dimensions.");
+            }
+
+            for (int i = 0; i < xs.Length; i++)
+            {
+                if (xs[i].Length != ys[i].Length)
+                {
+                    throw new ArgumentException("Matrices must have same dimensions.");
+                }
+            }
+
+            for (int i = 0; i < xs.Length; i++)
+            {
+                for (int j = 0; j < xs[i].Length; j++)
+                {
+                    result[i][j] += ys[i][j];
+                }
+            }
+
+            return result;
+        }
     }
 }

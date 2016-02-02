@@ -144,14 +144,16 @@ namespace ANN.Learning
         {
             int layerCount = Network.LayerCount;
             int neuronCount, inputCount;
-            double[][][] partialDerivatives = new double[layerCount][][];
             double[][] deltas;
+            double[][] partialDerivativesBias = new double[layerCount][];
+            double[][][] partialDerivatives = new double[layerCount][][];
             double[][][] tmpPartialDerivatives;
 
             for (int i = 0; i < layerCount; i++)
             {
                 neuronCount = _network[i].NeuronCount;
                 partialDerivatives[i] = new double[neuronCount][];
+                partialDerivativesBias[i] = new double[neuronCount];
 
                 for (int j = 0; j < neuronCount; j++)
                 {
@@ -168,6 +170,7 @@ namespace ANN.Learning
                 tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
 
                 partialDerivatives = Matrix.AddMatrices(partialDerivatives, tmpPartialDerivatives);
+                partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
             }
 
             return partialDerivatives;
