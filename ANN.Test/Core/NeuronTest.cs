@@ -20,7 +20,7 @@ namespace ANN.Test.Core
             sigmoidNeuron[0] = 0.1;
             sigmoidNeuron[1] = 0.2;
             sigmoidNeuron[2] = 0.3;
-            sigmoidNeuron.Threshold = 0.05;
+            sigmoidNeuron.Bias = 0.05;
 
             double actual = sigmoidNeuron.Update(input);
             double neuronOutput = sigmoidNeuron.Output;
@@ -41,7 +41,7 @@ namespace ANN.Test.Core
             sigmoidNeuron[0] = 0.1;
             sigmoidNeuron[1] = 0.2;
             sigmoidNeuron[2] = 0.3;
-            sigmoidNeuron.Threshold = 0.05;
+            sigmoidNeuron.Bias = 0.05;
 
             double actual = sigmoidNeuron.Activation(input);
 

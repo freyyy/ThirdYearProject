@@ -23,7 +23,7 @@ namespace ANN.Learning
             {
                 Neuron[i] += LearningRate * error * input[i];
             }
-            Neuron.Threshold += LearningRate * error * (-1);
+            Neuron.Bias += LearningRate * error;
 
             return Math.Abs(error);
         }

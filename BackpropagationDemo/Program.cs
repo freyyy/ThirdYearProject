@@ -20,13 +20,22 @@ namespace BackpropagationDemo
             Network network = new Network(new Layer[] { layer1, layer2 });
             LearningStrategy learning = new BackpropagationLearning(network, 0.25);
 
-            while (error > 0.1)
+            while (error > 0.01)
             {
                 error = learning.RunEpoch(inputs, targets);
                 epoch++;
                 Console.WriteLine("Iteration {0} error: {1}", epoch, error);
             }
             Console.WriteLine("Training complete after {0} epochs using the Backpropagation training regime.", epoch);
+            Console.WriteLine("Testing");
+            network.Update(new double[] { 0, 0 });
+            Console.WriteLine("{0}", network.Output[0]);
+            network.Update(new double[] { 0, 1 });
+            Console.WriteLine("{0}", network.Output[0]);
+            network.Update(new double[] { 1, 0 });
+            Console.WriteLine("{0}", network.Output[0]);
+            network.Update(new double[] { 1, 1 });
+            Console.WriteLine("{0}", network.Output[0]);
         }
     }
 }

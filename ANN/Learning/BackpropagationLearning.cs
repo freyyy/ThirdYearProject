@@ -54,7 +54,7 @@ namespace ANN.Learning
             for (int i = 0; i < _network[layerCount - 1].NeuronCount; i++)
             {
                 Neuron currentNeuron = _network[layerCount - 1][i];
-                error += Math.Abs(target - currentNeuron.Output);
+                error += Math.Pow(target - currentNeuron.Output, 2);
                 delta[layerCount - 1][i] = (target - currentNeuron.Output) *
                     currentNeuron.Function.OutputDerivative(currentNeuron.Output);
             }
@@ -82,7 +82,7 @@ namespace ANN.Learning
                     {
                         _network[i][j][k] += LearningRate * delta[i][j] * input[k];
                     }
-                    _network[i][j].Threshold += LearningRate * delta[i][j] * (-1);
+                    _network[i][j].Bias += LearningRate * delta[i][j];
                 }
                 input = _network[i].Output;
             }
@@ -99,7 +99,7 @@ namespace ANN.Learning
                 error += Run(inputs[i], targets[i]);
             }
 
-            return error;
+            return error / 2;
         }
     }
 }

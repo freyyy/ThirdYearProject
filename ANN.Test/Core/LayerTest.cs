@@ -20,8 +20,8 @@ namespace ANN.Test.Core
             layer[0][1] = 0.2;
             layer[1][0] = 0.3;
             layer[1][1] = 0.4;
-            layer[0].Threshold = 0.01;
-            layer[1].Threshold = 0.02;
+            layer[0].Bias = 0.01;
+            layer[1].Bias = 0.02;
 
             double[] actual = layer.Update(input);
             double[] layerOutput = layer.Output;
