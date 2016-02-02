@@ -80,9 +80,9 @@ namespace ANN.Test.Learning
             layers[0][1][1] = 0.4;
             layers[1][0][0] = 0.5;
             layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            layers[0][0].Bias = -0.01;
+            layers[0][1].Bias = -0.02;
+            layers[1][0].Bias = -0.05;
 
             double[][][] cachedActivations = sparseAutoencoder.UpdateCachedActivations(input);
 
@@ -143,9 +143,9 @@ namespace ANN.Test.Learning
             layers[0][1][1] = 0.4;
             layers[1][0][0] = 0.5;
             layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            layers[0][0].Bias = -0.01;
+            layers[0][1].Bias = -0.02;
+            layers[1][0].Bias = -0.05;
 
             network.Update(input);
             double[] actual = sparseAutoencoder.OutputLayerDeltas(target);
@@ -173,9 +173,9 @@ namespace ANN.Test.Learning
             layers[0][1][1] = 0.4;
             layers[1][0][0] = 0.5;
             layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            layers[0][0].Bias = -0.01;
+            layers[0][1].Bias = -0.02;
+            layers[1][0].Bias = -0.05;
 
             sparseAutoencoder.UpdateCachedActivations(input);
             double[][] actual = sparseAutoencoder.ComputeDeltas(0, target[0]);
@@ -213,9 +213,9 @@ namespace ANN.Test.Learning
             layers[0][1][1] = 0.4;
             layers[1][0][0] = 0.5;
             layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            layers[0][0].Bias = -0.01;
+            layers[0][1].Bias = -0.02;
+            layers[1][0].Bias = -0.05;
 
             sparseAutoencoder.UpdateCachedActivations(input);
             double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);

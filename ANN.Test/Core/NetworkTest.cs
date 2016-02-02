@@ -23,9 +23,9 @@ namespace ANN.Test.Core
             layers[0][1][1] = 0.4;
             layers[1][0][0] = 0.5;
             layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            layers[0][0].Bias = -0.01;
+            layers[0][1].Bias = -0.02;
+            layers[1][0].Bias = -0.05;
 
             double[] actual = network.Update(input);
             double[] networkOutput = network.Output;
