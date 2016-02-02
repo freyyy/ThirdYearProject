@@ -10,8 +10,6 @@ namespace ANN.Utils
     {
         public static double[][][] AddMatrices(double[][][] xs, double[][][] ys)
         {
-            double[][][] result = xs.Select(x => x.ToArray()).ToArray();
-
             if (xs.Length != ys.Length)
             {
                 throw new ArgumentException("Matrices must have same dimensions.");
@@ -36,24 +34,11 @@ namespace ANN.Utils
                 }
             }
 
-            for (int i = 0; i < xs.Length; i++)
-            {
-                for (int j = 0; j < xs[i].Length; j++)
-                {
-                    for (int k = 0; k < xs[i][j].Length; k++)
-                    {
-                        result[i][j][k] += ys[i][j][k];
-                    }
-                }
-            }
-
-            return result;
+            return xs.Zip(ys, (x2d, y2d) => x2d.Zip(y2d, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray()).ToArray();
         }
 
         public static double[][] AddMatrices(double[][] xs, double[][] ys)
         {
-            double[][] result = xs.Select(x => x.ToArray()).ToArray();
-
             if (xs.Length != ys.Length)
             {
                 throw new ArgumentException("Matrices must have same dimensions.");
@@ -67,15 +52,7 @@ namespace ANN.Utils
                 }
             }
 
-            for (int i = 0; i < xs.Length; i++)
-            {
-                for (int j = 0; j < xs[i].Length; j++)
-                {
-                    result[i][j] += ys[i][j];
-                }
-            }
-
-            return result;
+            return xs.Zip(ys, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray();
         }
     }
 }
