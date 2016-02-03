@@ -24,9 +24,9 @@ namespace ANN.Learning
             {
                 Neuron[i] += LearningRate * deriv * error * input[i];
             }
-            Neuron.Threshold += LearningRate * deriv * error * (-1);
+            Neuron.Bias += LearningRate * deriv * error;
 
-            return Math.Abs(error);
+            return Math.Pow(target - output, 2);
         }
 
         public double RunEpoch(double[][] input, double[] target)
@@ -38,7 +38,7 @@ namespace ANN.Learning
                 error += Run(input[i], target[i]);
             }
 
-            return error;
+            return error / 2;
         }
     }
 }

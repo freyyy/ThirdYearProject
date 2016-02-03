@@ -4,16 +4,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ANN.Core;
+using ANN.Utils;
 
 namespace ANN.Learning
 {
     public class SparseAutoencoderLearning
     {
         private Network _network;
+        private int _batchSize;
+        private double[][][] _cachedActivations;
 
-        public SparseAutoencoderLearning(Network network)
+        public SparseAutoencoderLearning(Network network) : this(network, 1) { }
+
+        public SparseAutoencoderLearning(Network network, int batchSize)
         {
             _network = network;
+            _batchSize = batchSize;
+
+            _cachedActivations = new double[batchSize][][];
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                _cachedActivations[i] = new double[network.LayerCount][];
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    _cachedActivations[i][j] = new double[network[j].NeuronCount];
+                }
+            }
+        }
+
+        public double[][][] UpdateCachedActivations(double[][] input)
+        {
+            if (input.Length != _batchSize)
+            {
+                throw new ArgumentException("Input size must match the batch size exactly.");
+            }
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                _network.Update(input[i]);
+
+                for (int j = 0; j < _network.LayerCount; j++)
+                {
+                    for (int k = 0; k < _network[j].NeuronCount; k++)
+                    {
+                        _cachedActivations[i][j][k] = _network[j][k].Output;
+                    }
+                }
+            }
+
+            return _cachedActivations;
         }
 
         public double[] OutputLayerDeltas(double[] target)
@@ -24,11 +65,11 @@ namespace ANN.Learning
             return deltas;
         }
 
-        public double[][] ComputeDeltas(double[] target)
+        public double[][] ComputeDeltas(int batchIndex, double[] target)
         {
             int layerCount = _network.LayerCount;
             double[][] deltas = new double[layerCount][];
-            double[] output = _network[layerCount - 1].Output;
+            double[] output = _cachedActivations[batchIndex][layerCount - 1];
 
             if (target.Length != _network[layerCount - 1].NeuronCount)
             {
@@ -49,7 +90,7 @@ namespace ANN.Learning
 
                 for (int j = 0; j < _network[i].NeuronCount; j++)
                 {
-                    double neuronOutput = _network[i][j].Output;
+                    double neuronOutput = _cachedActivations[batchIndex][i][j];
 
                     for (int k = 0; k < weights.Length; k++)
                     {
@@ -62,7 +103,7 @@ namespace ANN.Learning
             return deltas;
         }
 
-        public double[][][] ComputePartialDerivatives(double[][] deltas, double[] input)
+        public double[][][] ComputePartialDerivatives(int batchIndex, double[][] deltas, double[] input)
         {
             int layerCount = Network.LayerCount;
             int neuronCount, inputCount;
@@ -88,20 +129,66 @@ namespace ANN.Learning
                 {
                     inputCount = _network[i][j].InputCount;
 
-                    for(int k = 0; k < inputCount; k++)
+                    for (int k = 0; k < inputCount; k++)
                     {
                         partialDerivatives[i][j][k] = deltas[i][j] * input[k];
                     }
                 }
-                input = _network[i].Output;
+                input = _cachedActivations[batchIndex][i];
             }
 
             return partialDerivatives;
         }
 
+        public Tuple<double[][][], double[][]> ComputeBatchPartialDerivatives(double[][] input, double[][] target)
+        {
+            int layerCount = Network.LayerCount;
+            int neuronCount, inputCount;
+            double[][] deltas;
+            double[][] partialDerivativesBias = new double[layerCount][];
+            double[][][] partialDerivativesWeights = new double[layerCount][][];
+            double[][][] tmpPartialDerivatives;
+
+            for (int i = 0; i < layerCount; i++)
+            {
+                neuronCount = _network[i].NeuronCount;
+                partialDerivativesWeights[i] = new double[neuronCount][];
+                partialDerivativesBias[i] = new double[neuronCount];
+
+                for (int j = 0; j < neuronCount; j++)
+                {
+                    inputCount = _network[i][j].InputCount;
+                    partialDerivativesWeights[i][j] = new double[inputCount];
+                }
+            }
+
+            UpdateCachedActivations(input);
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                deltas = ComputeDeltas(i, target[i]);
+                tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
+
+                partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, tmpPartialDerivatives);
+                partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
+            }
+
+            return Tuple.Create(partialDerivativesWeights, partialDerivativesBias);
+        }
+
         public Network Network
         {
             get { return _network; }
+        }
+
+        public int BatchSize
+        {
+            get { return _batchSize; }
+        }
+
+        public double[][][] CachedActivations
+        {
+            get { return _cachedActivations;  }
         }
     }
 }

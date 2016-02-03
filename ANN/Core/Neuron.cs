@@ -8,7 +8,7 @@ namespace ANN.Core
     {
         private double[] _weights;
 
-        private double _threshold;
+        private double _bias;
 
         private double _output;
 
@@ -20,14 +20,15 @@ namespace ANN.Core
         {
             _weights = new double[inputCount];
             _inputCount = inputCount;
-            _threshold = 0.5;
             _function = function;
 
             Random rnd = new Random();
             for(int i = 0; i < inputCount; i++)
             {
-                _weights[i] = (double) rnd.Next(0, 10) / 10;
+                _weights[i] = (double) rnd.Next(-10, 10) / 10;
             }
+
+            _bias = (double)rnd.Next(-10, 10) / 10;
         }
 
         public double this[int i]
@@ -36,10 +37,10 @@ namespace ANN.Core
             set { _weights[i] = value; }
         }
 
-        public double Threshold
+        public double Bias
         {
-            get { return _threshold; }
-            set { _threshold = value; }
+            get { return _bias; }
+            set { _bias = value; }
         }
 
         public int InputCount
@@ -59,7 +60,7 @@ namespace ANN.Core
 
         public double Activation(double[] input)
         {
-            return Vector.DotProduct(input, _weights) - _threshold;
+            return Vector.DotProduct(input, _weights) + _bias;
         }
 
         public double Update(double[] input)

@@ -20,15 +20,24 @@ namespace DeltaRuleDemo
 
             ActivationFunction function = new SigmoidFunction();
             Neuron neuron = new Neuron(2, function);
-            LearningStrategy learning = new DeltaRuleLearning(neuron, 0.25);
+            LearningStrategy learning = new DeltaRuleLearning(neuron, 0.75);
 
-            while (error > 0.1)
+            while (error > 0.01)
             {
                 error = learning.RunEpoch(inputs, targets);
                 epoch++;
                 Console.WriteLine("Iteration {0} error: {1}", epoch, error);
             }
             Console.WriteLine("Training complete after {0} epochs using the Delta Rule learning regime.", epoch);
+            Console.WriteLine("Testing");
+            neuron.Update(new double[] { 0, 0 });
+            Console.WriteLine("{0}", neuron.Output);
+            neuron.Update(new double[] { 0, 1 });
+            Console.WriteLine("{0}", neuron.Output);
+            neuron.Update(new double[] { 1, 0 });
+            Console.WriteLine("{0}", neuron.Output);
+            neuron.Update(new double[] { 1, 1 });
+            Console.WriteLine("{0}", neuron.Output);
         }
     }
 }
