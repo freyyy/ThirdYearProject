@@ -57,7 +57,7 @@
     <Compile Include="Core\NetworkTest.cs" />
     <Compile Include="Function\SigmoidFunctionTest.cs" />
     <Compile Include="Function\ThresholdFunctionTest.cs" />
-    <Compile Include="Function\SquaredErrorCostFunctionTest.cs" />
+    <Compile Include="Function\CostFunctionsTest.cs" />
     <Compile Include="Learning\SparseAutoencoderLearningTest.cs" />
     <Compile Include="Utils\MatrixTest.cs" />
     <Compile Include="Utils\VectorTest.cs" />
