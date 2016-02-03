@@ -299,7 +299,7 @@ namespace ANN.Test.Learning
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
             double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
-            double[][][] gradient = new double[][][]
+            double[][][] gradientWeights = new double[][][]
             {
                 new double[][]
                 {
@@ -311,6 +311,12 @@ namespace ANN.Test.Learning
                     new double[] { 0, 0 }
                 }
             };
+            double[][] gradientBias = new double[][]
+            {
+                new double[] { 0, 0 },
+                new double[] { 0 }
+            };
+            double tmp;
 
             layers[0][0][0] = 0.1;
             layers[0][0][1] = 0.2;
@@ -328,35 +334,59 @@ namespace ANN.Test.Learning
                 {
                     for (int k = 0; k < network[i][j].InputCount; k++)
                     {
-                        double tmp = network[i][j][k];
+                        tmp = network[i][j][k];
                         network[i][j][k] = tmp + 0.0001;
 
                         for (int l = 0; l < input.Length; l++)
                         {
-                            gradient[i][j][k] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                            gradientWeights[i][j][k] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
                         }
 
                         network[i][j][k] = tmp - 0.0001;
 
                         for (int l = 0; l < input.Length; l++)
                         {
-                            gradient[i][j][k] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                            gradientWeights[i][j][k] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
                         }
 
                         network[i][j][k] = tmp;
-                        gradient[i][j][k] = gradient[i][j][k] / 0.0002;
+                        gradientWeights[i][j][k] = gradientWeights[i][j][k] / 0.0002;
                     }
+
+                    tmp = network[i][j].Bias;
+                    network[i][j].Bias = tmp + 0.0001;
+
+                    for(int l = 0; l < input.Length; l++)
+                    {
+                        gradientBias[i][j] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                    }
+
+                    network[i][j].Bias = tmp - 0.0001;
+
+                    for (int l = 0; l < input.Length; l++)
+                    {
+                        gradientBias[i][j] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                    }
+
+                    network[i][j].Bias = tmp;
+                    gradientBias[i][j] = gradientBias[i][j] / 0.0002;
                 }
             }
 
-            double[][][] partialDerivatives = sparseAutoencoder.ComputeBatchPartialDerivatives(input, target);
+            Tuple<double[][][], double[][]> result = sparseAutoencoder.ComputeBatchPartialDerivatives(input, target);
+            double[][][] partialDerivativesWeights = result.Item1;
+            double[][] partialDerivativesBias = result.Item2;
 
-            Assert.AreEqual(gradient[0][0][0], ((double)1 / input.Length) * partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][0][1], ((double)1 / input.Length) * partialDerivatives[0][0][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][1][0], ((double)1 / input.Length) * partialDerivatives[0][1][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][1][1], ((double)1 / input.Length) * partialDerivatives[0][1][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[1][0][0], ((double)1 / input.Length) * partialDerivatives[1][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[1][0][1], ((double)1 / input.Length) * partialDerivatives[1][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][0], ((double)1 / input.Length) * partialDerivativesWeights[0][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][1], ((double)1 / input.Length) * partialDerivativesWeights[0][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][0], ((double)1 / input.Length) * partialDerivativesWeights[0][1][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][1], ((double)1 / input.Length) * partialDerivativesWeights[0][1][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][0], ((double)1 / input.Length) * partialDerivativesWeights[1][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][1], ((double)1 / input.Length) * partialDerivativesWeights[1][0][1], 0.0001, "Gradient checking failed");
+
+            Assert.AreEqual(gradientBias[0][0], ((double)1 / input.Length) * partialDerivativesBias[0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientBias[0][1], ((double)1 / input.Length) * partialDerivativesBias[0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientBias[1][0], ((double)1 / input.Length) * partialDerivativesBias[1][0], 0.0001, "Gradient checking failed");
         }
     }
 }

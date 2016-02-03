@@ -140,25 +140,25 @@ namespace ANN.Learning
             return partialDerivatives;
         }
 
-        public double[][][] ComputeBatchPartialDerivatives(double[][] input, double[][] target)
+        public Tuple<double[][][], double[][]> ComputeBatchPartialDerivatives(double[][] input, double[][] target)
         {
             int layerCount = Network.LayerCount;
             int neuronCount, inputCount;
             double[][] deltas;
             double[][] partialDerivativesBias = new double[layerCount][];
-            double[][][] partialDerivatives = new double[layerCount][][];
+            double[][][] partialDerivativesWeights = new double[layerCount][][];
             double[][][] tmpPartialDerivatives;
 
             for (int i = 0; i < layerCount; i++)
             {
                 neuronCount = _network[i].NeuronCount;
-                partialDerivatives[i] = new double[neuronCount][];
+                partialDerivativesWeights[i] = new double[neuronCount][];
                 partialDerivativesBias[i] = new double[neuronCount];
 
                 for (int j = 0; j < neuronCount; j++)
                 {
                     inputCount = _network[i][j].InputCount;
-                    partialDerivatives[i][j] = new double[inputCount];
+                    partialDerivativesWeights[i][j] = new double[inputCount];
                 }
             }
 
@@ -169,11 +169,11 @@ namespace ANN.Learning
                 deltas = ComputeDeltas(i, target[i]);
                 tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
 
-                partialDerivatives = Matrix.AddMatrices(partialDerivatives, tmpPartialDerivatives);
+                partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, tmpPartialDerivatives);
                 partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
             }
 
-            return partialDerivatives;
+            return Tuple.Create(partialDerivativesWeights, partialDerivativesBias);
         }
 
         public Network Network
