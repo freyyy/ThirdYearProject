@@ -44,9 +44,8 @@
     <Compile Include="Core\Network.cs" />
     <Compile Include="Core\Neuron.cs" />
     <Compile Include="Function\ActivationFunction.cs" />
-    <Compile Include="Function\CostFunction.cs" />
+    <Compile Include="Function\CostFunctions.cs" />
     <Compile Include="Function\SigmoidFunction.cs" />
-    <Compile Include="Function\SquaredErrorCostFunction.cs" />
     <Compile Include="Function\ThresholdFunction.cs" />
     <Compile Include="Learning\BackpropagationLearning.cs" />
     <Compile Include="Learning\DeltaRuleLearning.cs" />
