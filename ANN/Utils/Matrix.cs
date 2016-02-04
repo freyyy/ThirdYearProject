@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ANN.Utils
 {
-    public class Matrix
+    public static class Matrix
     {
         public static double[][][] AddMatrices(double[][][] xs, double[][][] ys)
         {

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace ANN.Utils
 {
-    public class Vector
+    public static class Vector
     {
         public static double DotProduct(double[] xs, double[] ys)
         {
