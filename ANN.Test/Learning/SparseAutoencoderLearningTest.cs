@@ -276,15 +276,15 @@ namespace ANN.Test.Learning
             };
             double[][] actual = new double[input.Length][];
 
-            layers[0][0][0] = 0.1;
-            layers[0][0][1] = 0.2;
-            layers[0][1][0] = 0.3;
-            layers[0][1][1] = 0.4;
-            layers[1][0][0] = 0.5;
-            layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            //layers[0][0][0] = 0.1;
+            //layers[0][0][1] = 0.2;
+            //layers[0][1][0] = 0.3;
+            //layers[0][1][1] = 0.4;
+            //layers[1][0][0] = 0.5;
+            //layers[1][0][1] = 0.5;
+            //layers[0][0].Bias = 0.01;
+            //layers[0][1].Bias = 0.02;
+            //layers[1][0].Bias = 0.05;
 
             for (int i = 0; i < network.LayerCount; i++)
             {
@@ -358,15 +358,15 @@ namespace ANN.Test.Learning
             double tmp;
             double[][] actual = new double[input.Length][];
 
-            layers[0][0][0] = 0.1;
-            layers[0][0][1] = 0.2;
-            layers[0][1][0] = 0.3;
-            layers[0][1][1] = 0.4;
-            layers[1][0][0] = 0.5;
-            layers[1][0][1] = 0.5;
-            layers[0][0].Bias = 0.01;
-            layers[0][1].Bias = 0.02;
-            layers[1][0].Bias = 0.05;
+            //layers[0][0][0] = 0.1;
+            //layers[0][0][1] = 0.2;
+            //layers[0][1][0] = 0.3;
+            //layers[0][1][1] = 0.4;
+            //layers[1][0][0] = 0.5;
+            //layers[1][0][1] = 0.5;
+            //layers[0][0].Bias = 0.01;
+            //layers[0][1].Bias = 0.02;
+            //layers[1][0].Bias = 0.05;
 
             for (int i = 0; i < network.LayerCount; i++)
             {

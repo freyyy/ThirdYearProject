@@ -61,6 +61,7 @@
     <Compile Include="Learning\SparseAutoencoderLearningTest.cs" />
     <Compile Include="Utils\MatrixTest.cs" />
     <Compile Include="Utils\NetworksTest.cs" />
+    <Compile Include="Utils\MathsTest.cs" />
     <Compile Include="Utils\VectorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
