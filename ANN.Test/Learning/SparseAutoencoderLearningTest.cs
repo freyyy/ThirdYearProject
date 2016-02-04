@@ -335,7 +335,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.0001);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
             double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
             double[][][] gradientWeights = new double[][][]
@@ -382,7 +382,7 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredError(actual, target);
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredErrorL2(network, sparseAutoencoder.Lambda, actual, target);
 
                         network[i][j][k] = tmp - 0.0001;
 
@@ -391,7 +391,7 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredError(actual, target);
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredErrorL2(network, sparseAutoencoder.Lambda, actual, target);
 
                         network[i][j][k] = tmp;
                         gradientWeights[i][j][k] = gradientWeights[i][j][k] / 0.0002;
@@ -425,16 +425,16 @@ namespace ANN.Test.Learning
             double[][][] partialDerivativesWeights = result.Item1;
             double[][] partialDerivativesBias = result.Item2;
 
-            Assert.AreEqual(gradientWeights[0][0][0], ((double)1 / input.Length) * partialDerivativesWeights[0][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientWeights[0][0][1], ((double)1 / input.Length) * partialDerivativesWeights[0][0][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientWeights[0][1][0], ((double)1 / input.Length) * partialDerivativesWeights[0][1][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientWeights[0][1][1], ((double)1 / input.Length) * partialDerivativesWeights[0][1][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientWeights[1][0][0], ((double)1 / input.Length) * partialDerivativesWeights[1][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientWeights[1][0][1], ((double)1 / input.Length) * partialDerivativesWeights[1][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][0], partialDerivativesWeights[0][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][1], partialDerivativesWeights[0][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][0], partialDerivativesWeights[0][1][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][1], partialDerivativesWeights[0][1][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][0], partialDerivativesWeights[1][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][1], partialDerivativesWeights[1][0][1], 0.0001, "Gradient checking failed");
 
-            Assert.AreEqual(gradientBias[0][0], ((double)1 / input.Length) * partialDerivativesBias[0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientBias[0][1], ((double)1 / input.Length) * partialDerivativesBias[0][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradientBias[1][0], ((double)1 / input.Length) * partialDerivativesBias[1][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientBias[0][0], partialDerivativesBias[0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientBias[0][1], partialDerivativesBias[0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientBias[1][0], partialDerivativesBias[1][0], 0.0001, "Gradient checking failed");
         }
     }
 }

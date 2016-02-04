@@ -177,6 +177,18 @@ namespace ANN.Learning
                 partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
             }
 
+            for (int i = 0; i < _network.LayerCount; i++)
+            {
+                for (int j = 0; j < _network[i].NeuronCount; j++)
+                {
+                    for (int k = 0; k < _network[i][j].InputCount; k++)
+                    {
+                        partialDerivativesWeights[i][j][k] = (partialDerivativesWeights[i][j][k] / input.Length) +_lambda * _network[i][j][k];
+                    }
+                    partialDerivativesBias[i][j] = partialDerivativesBias[i][j] / input.Length;
+                }
+            }
+
             return Tuple.Create(partialDerivativesWeights, partialDerivativesBias);
         }
 
