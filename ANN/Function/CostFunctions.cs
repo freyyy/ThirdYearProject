@@ -6,6 +6,24 @@ namespace ANN.Function
 {
     public static class CostFunctions
     {
+        public static double HalfSquaredError(double[][] actual, double[][] target)
+        {
+            if (actual.Length != target.Length)
+            {
+                throw new ArgumentException("Invalid vectors for half squared error cost. Make sure they are of the same length.");
+            }
+
+            for (int i = 0; i < actual.Length; i++)
+            {
+                if (actual[i].Length != target[i].Length)
+                {
+                    throw new ArgumentException("Invalid vectors for half squared error cost. Make sure they are of the same length.");
+                }
+            }
+
+            return actual.Zip(target, (a1d, t1d) => a1d.Zip(t1d, (a, t) => Math.Pow(a - t, 2)).Sum()).Average();
+        }
+
         public static double HalfSquaredError(double[] actual, double[] target)
         {
             if (actual.Length != target.Length)
