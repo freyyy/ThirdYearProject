@@ -18,9 +18,11 @@ namespace ANN.Test.Learning
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
 
             int batchSize = sparseAutoencoder.BatchSize;
+            double lambda = sparseAutoencoder.Lambda;
             double[][][] cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(1, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(0, lambda, 0, "Invalid lambda");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
             
             for (int i = 0; i < batchSize; i++)
@@ -36,9 +38,31 @@ namespace ANN.Test.Learning
             sparseAutoencoder = new SparseAutoencoderLearning(network, 32);
 
             batchSize = sparseAutoencoder.BatchSize;
+            lambda = sparseAutoencoder.Lambda;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(0, lambda, 0, "Invalid lambda");
+            Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                Assert.AreEqual(network.LayerCount, cachedActivations[i].Length);
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    Assert.AreEqual(network[j].NeuronCount, cachedActivations[i][j].Length);
+                }
+            }
+
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.001);
+
+            batchSize = sparseAutoencoder.BatchSize;
+            lambda = sparseAutoencoder.Lambda;
+            cachedActivations = sparseAutoencoder.CachedActivations;
+
+            Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(0.001, lambda, 0, "Invalid lambda");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
