@@ -21,7 +21,7 @@ namespace ANN.Function
                 }
             }
 
-            return actual.Zip(target, (a1d, t1d) => a1d.Zip(t1d, (a, t) => Math.Pow(a - t, 2)).Sum()).Average();
+            return actual.Zip(target, (a1d, t1d) => 0.5 * a1d.Zip(t1d, (a, t) => Math.Pow(a - t, 2)).Sum()).Average();
         }
 
         public static double HalfSquaredError(double[] actual, double[] target)
@@ -53,7 +53,7 @@ namespace ANN.Function
                 }
             }
 
-            double averageSquaredError = actual.Zip(target, (a1d, t1d) => a1d.Zip(t1d, (a, t) => Math.Pow(a - t, 2)).Sum()).Average();
+            double averageSquaredError = actual.Zip(target, (a1d, t1d) => 0.5 * a1d.Zip(t1d, (a, t) => Math.Pow(a - t, 2)).Sum()).Average();
             double weightDecay = 0;
 
             for (int i = 0; i < network.LayerCount; i++)

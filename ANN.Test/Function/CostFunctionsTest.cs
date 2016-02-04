@@ -28,7 +28,7 @@ namespace ANN.Test.Function
                 new double[] { 0.7 },
                 new double[] { 1.5 }
             };
-            double expected = 0.14667;
+            double expected = 0.12333;
 
             layers[0][0][0] = 0.1;
             layers[0][0][1] = 0.2;
@@ -57,7 +57,7 @@ namespace ANN.Test.Function
                 new double[] { 0.7 },
                 new double[] { 1.5 }
             };
-            double expected = 0.04667;
+            double expected = 0.02333;
             double actual = CostFunctions.HalfSquaredError(output, target);
 
             Assert.AreEqual(expected, actual, 0.0001, "Invalid squared error cost");

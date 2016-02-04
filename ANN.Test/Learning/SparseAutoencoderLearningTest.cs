@@ -238,7 +238,7 @@ namespace ANN.Test.Learning
             SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
-            double[][][] gradient = new double[][][]
+            double[][][] gradientWeights = new double[][][]
             {
                 new double[][]
                 {
@@ -250,6 +250,7 @@ namespace ANN.Test.Learning
                     new double[] { 0, 0 }
                 }
             };
+            double[][] actual = new double[input.Length][];
 
             layers[0][0][0] = 0.1;
             layers[0][0][1] = 0.2;
@@ -269,11 +270,25 @@ namespace ANN.Test.Learning
                     {
                         double tmp = network[i][j][k];
                         network[i][j][k] = tmp + 0.0001;
-                        gradient[i][j][k] += Math.Pow(network.Update(input[0])[0] - target[0][0], 2);
+
+                        for (int l = 0; l < input.Length; l++)
+                        {
+                            actual[l] = network.Update(input[l]);
+                        }
+
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredError(actual, target);
+
                         network[i][j][k] = tmp - 0.0001;
-                        gradient[i][j][k] -= Math.Pow(network.Update(input[0])[0] - target[0][0], 2);
+
+                        for (int l = 0; l < input.Length; l++)
+                        {
+                            actual[l] = network.Update(input[l]);
+                        }
+
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredError(actual, target);
+
                         network[i][j][k] = tmp;
-                        gradient[i][j][k]  = 0.5 * gradient[i][j][k] / 0.0002;
+                        gradientWeights[i][j][k]  = gradientWeights[i][j][k] / 0.0002;
                     }
                 }
             }
@@ -282,12 +297,12 @@ namespace ANN.Test.Learning
             double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);
             double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(0, deltas, input[0]);
 
-            Assert.AreEqual(gradient[0][0][0], partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][0][1], partialDerivatives[0][0][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][1][0], partialDerivatives[0][1][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[0][1][1], partialDerivatives[0][1][1], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[1][0][0], partialDerivatives[1][0][0], 0.0001, "Gradient checking failed");
-            Assert.AreEqual(gradient[1][0][1], partialDerivatives[1][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][0], partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][0][1], partialDerivatives[0][0][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][0], partialDerivatives[0][1][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[0][1][1], partialDerivatives[0][1][1], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][0], partialDerivatives[1][0][0], 0.0001, "Gradient checking failed");
+            Assert.AreEqual(gradientWeights[1][0][1], partialDerivatives[1][0][1], 0.0001, "Gradient checking failed");
         }
 
         [TestMethod]
@@ -317,6 +332,7 @@ namespace ANN.Test.Learning
                 new double[] { 0 }
             };
             double tmp;
+            double[][] actual = new double[input.Length][];
 
             layers[0][0][0] = 0.1;
             layers[0][0][1] = 0.2;
@@ -339,15 +355,19 @@ namespace ANN.Test.Learning
 
                         for (int l = 0; l < input.Length; l++)
                         {
-                            gradientWeights[i][j][k] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                            actual[l] = network.Update(input[l]);
                         }
+
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredError(actual, target);
 
                         network[i][j][k] = tmp - 0.0001;
 
                         for (int l = 0; l < input.Length; l++)
                         {
-                            gradientWeights[i][j][k] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                            actual[l] = network.Update(input[l]);
                         }
+
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredError(actual, target);
 
                         network[i][j][k] = tmp;
                         gradientWeights[i][j][k] = gradientWeights[i][j][k] / 0.0002;
@@ -356,17 +376,21 @@ namespace ANN.Test.Learning
                     tmp = network[i][j].Bias;
                     network[i][j].Bias = tmp + 0.0001;
 
-                    for(int l = 0; l < input.Length; l++)
+                    for (int l = 0; l < input.Length; l++)
                     {
-                        gradientBias[i][j] += ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                        actual[l] = network.Update(input[l]);
                     }
+
+                    gradientBias[i][j] += CostFunctions.HalfSquaredError(actual, target);
 
                     network[i][j].Bias = tmp - 0.0001;
 
                     for (int l = 0; l < input.Length; l++)
                     {
-                        gradientBias[i][j] -= ((double)1 / input.Length) * 0.5 * Math.Pow(network.Update(input[l])[0] - target[l][0], 2);
+                        actual[l] = network.Update(input[l]);
                     }
+
+                    gradientBias[i][j] -= CostFunctions.HalfSquaredError(actual, target);
 
                     network[i][j].Bias = tmp;
                     gradientBias[i][j] = gradientBias[i][j] / 0.0002;
