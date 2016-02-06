@@ -12,6 +12,8 @@ namespace ANN.Learning
     {
         private Network _network;
         private int _batchSize;
+        private double _sparsity;
+        private double _beta;
         private double _lambda;
         private double[][][] _cachedActivations;
 
@@ -19,11 +21,15 @@ namespace ANN.Learning
 
         public SparseAutoencoderLearning(Network network, int batchSize) : this(network, batchSize, 0) { }
 
-        public SparseAutoencoderLearning(Network network, int batchSize, double lambda)
+        public SparseAutoencoderLearning(Network network, int batchSize, double lambda) : this(network, batchSize, lambda, 0, 0) { }
+
+        public SparseAutoencoderLearning(Network network, int batchSize, double lambda, double sparsity, double beta)
         {
             _network = network;
             _batchSize = batchSize;
             _lambda = lambda;
+            _sparsity = sparsity;
+            _beta = beta;
 
             _cachedActivations = new double[batchSize][][];
 
@@ -200,6 +206,16 @@ namespace ANN.Learning
         public int BatchSize
         {
             get { return _batchSize; }
+        }
+
+        public double Sparsity
+        {
+            get { return _sparsity; }
+        }
+
+        public double Beta
+        {
+            get { return _beta; }
         }
 
         public double Lambda

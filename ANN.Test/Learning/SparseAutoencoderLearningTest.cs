@@ -19,10 +19,14 @@ namespace ANN.Test.Learning
 
             int batchSize = sparseAutoencoder.BatchSize;
             double lambda = sparseAutoencoder.Lambda;
+            double sparsity = sparseAutoencoder.Sparsity;
+            double beta = sparseAutoencoder.Beta;
             double[][][] cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(1, batchSize, 0, "Inalid batch size");
-            Assert.AreEqual(0, lambda, 0, "Invalid lambda");
+            Assert.AreEqual(0, lambda, 0.0001, "Invalid lambda");
+            Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
+            Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
             
             for (int i = 0; i < batchSize; i++)
@@ -39,10 +43,14 @@ namespace ANN.Test.Learning
 
             batchSize = sparseAutoencoder.BatchSize;
             lambda = sparseAutoencoder.Lambda;
+            sparsity = sparseAutoencoder.Sparsity;
+            beta = sparseAutoencoder.Beta;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
-            Assert.AreEqual(0, lambda, 0, "Invalid lambda");
+            Assert.AreEqual(0, lambda, 0.0001, "Invalid lambda");
+            Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
+            Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
@@ -59,10 +67,38 @@ namespace ANN.Test.Learning
 
             batchSize = sparseAutoencoder.BatchSize;
             lambda = sparseAutoencoder.Lambda;
+            sparsity = sparseAutoencoder.Sparsity;
+            beta = sparseAutoencoder.Beta;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
-            Assert.AreEqual(0.001, lambda, 0, "Invalid lambda");
+            Assert.AreEqual(0.001, lambda, 0.0001, "Invalid lambda");
+            Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
+            Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
+            Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
+
+            for (int i = 0; i < batchSize; i++)
+            {
+                Assert.AreEqual(network.LayerCount, cachedActivations[i].Length);
+
+                for (int j = 0; j < network.LayerCount; j++)
+                {
+                    Assert.AreEqual(network[j].NeuronCount, cachedActivations[i][j].Length);
+                }
+            }
+
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.001, 0.1, 3);
+
+            batchSize = sparseAutoencoder.BatchSize;
+            lambda = sparseAutoencoder.Lambda;
+            sparsity = sparseAutoencoder.Sparsity;
+            beta = sparseAutoencoder.Beta;
+            cachedActivations = sparseAutoencoder.CachedActivations;
+
+            Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
+            Assert.AreEqual(0.001, lambda, 0.0001, "Invalid lambda");
+            Assert.AreEqual(0.1, sparsity, 0.0001, "Invalid sparsity");
+            Assert.AreEqual(3, beta, 0.0001, "Invalid beta");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
