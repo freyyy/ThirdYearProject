@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ANN.Core;
 using ANN.Function;
 using ANN.Learning;
+using ANN.Utils;
 
 namespace ANN.Test.Learning
 {
@@ -218,9 +219,10 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 0);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
+            double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
             double[][] expected = new double[][]
             {
                 new double[] { -0.0108698887658827, -0.0105735765912387 },
@@ -238,7 +240,7 @@ namespace ANN.Test.Learning
             layers[1][0].Bias = -0.05;
 
             sparseAutoencoder.UpdateCachedActivations(input);
-            double[][] actual = sparseAutoencoder.ComputeDeltas(0, target[0]);
+            double[][] actual = sparseAutoencoder.ComputeDeltas(0, averageActivations, target[0]);
             Assert.AreEqual(expected[0][0], actual[0][0], 0.0001, "Invalid deltas");
             Assert.AreEqual(expected[0][1], actual[0][1], 0.0001, "Invalid deltas");
             Assert.AreEqual(expected[1][0], actual[1][0], 0.0001, "Invalid deltas");
@@ -250,9 +252,10 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 0);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
+            double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
             double[][][] expected = new double[][][]
             {
                 new double[][]
@@ -278,7 +281,7 @@ namespace ANN.Test.Learning
             layers[1][0].Bias = -0.05;
 
             sparseAutoencoder.UpdateCachedActivations(input);
-            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);
+            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, averageActivations, target[0]);
             double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(0, deltas, input[0]);
 
             Assert.AreEqual(expected[0][0][0], partialDerivatives[0][0][0], 0.0001, "Invalid partial derivative");
@@ -295,9 +298,10 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
+            double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
             double[][][] gradientWeights = new double[][][]
             {
                 new double[][]
@@ -336,7 +340,10 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredError(actual, target);
+                        sparseAutoencoder.UpdateCachedActivations(input);
+                        averageActivations = sparseAutoencoder.CachedActivations[0];
+
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                         network[i][j][k] = tmp - 0.0001;
 
@@ -345,7 +352,10 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredError(actual, target);
+                        sparseAutoencoder.UpdateCachedActivations(input);
+                        averageActivations = sparseAutoencoder.CachedActivations[0];
+
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                         network[i][j][k] = tmp;
                         gradientWeights[i][j][k]  = gradientWeights[i][j][k] / 0.0002;
@@ -354,7 +364,8 @@ namespace ANN.Test.Learning
             }
 
             sparseAutoencoder.UpdateCachedActivations(input);
-            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, target[0]);
+            averageActivations = sparseAutoencoder.CachedActivations[0];
+            double[][] deltas = sparseAutoencoder.ComputeDeltas(0, averageActivations, target[0]);
             double[][][] partialDerivatives = sparseAutoencoder.ComputePartialDerivatives(0, deltas, input[0]);
 
             Assert.AreEqual(gradientWeights[0][0][0], partialDerivatives[0][0][0], 0.0001, "Gradient checking failed");
@@ -371,7 +382,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.0001);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.0001, 0.1, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
             double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
             double[][][] gradientWeights = new double[][][]
@@ -393,6 +404,7 @@ namespace ANN.Test.Learning
             };
             double tmp;
             double[][] actual = new double[input.Length][];
+            double[][] averageActivations;
 
             //layers[0][0][0] = 0.1;
             //layers[0][0][1] = 0.2;
@@ -418,7 +430,10 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredErrorL2(network, sparseAutoencoder.Lambda, actual, target);
+                        sparseAutoencoder.UpdateCachedActivations(input);
+                        averageActivations = Networks.AverageActivations(network, sparseAutoencoder.CachedActivations);
+
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                         network[i][j][k] = tmp - 0.0001;
 
@@ -427,7 +442,10 @@ namespace ANN.Test.Learning
                             actual[l] = network.Update(input[l]);
                         }
 
-                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredErrorL2(network, sparseAutoencoder.Lambda, actual, target);
+                        sparseAutoencoder.UpdateCachedActivations(input);
+                        averageActivations = Networks.AverageActivations(network, sparseAutoencoder.CachedActivations);
+
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                         network[i][j][k] = tmp;
                         gradientWeights[i][j][k] = gradientWeights[i][j][k] / 0.0002;
@@ -441,7 +459,10 @@ namespace ANN.Test.Learning
                         actual[l] = network.Update(input[l]);
                     }
 
-                    gradientBias[i][j] += CostFunctions.HalfSquaredError(actual, target);
+                    sparseAutoencoder.UpdateCachedActivations(input);
+                    averageActivations = Networks.AverageActivations(network, sparseAutoencoder.CachedActivations);
+
+                    gradientBias[i][j] += CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                     network[i][j].Bias = tmp - 0.0001;
 
@@ -450,7 +471,10 @@ namespace ANN.Test.Learning
                         actual[l] = network.Update(input[l]);
                     }
 
-                    gradientBias[i][j] -= CostFunctions.HalfSquaredError(actual, target);
+                    sparseAutoencoder.UpdateCachedActivations(input);
+                    averageActivations = Networks.AverageActivations(network, sparseAutoencoder.CachedActivations);
+
+                    gradientBias[i][j] -= CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sparseAutoencoder.Sparsity, sparseAutoencoder.Lambda, sparseAutoencoder.Beta, actual, target);
 
                     network[i][j].Bias = tmp;
                     gradientBias[i][j] = gradientBias[i][j] / 0.0002;

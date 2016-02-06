@@ -75,7 +75,7 @@ namespace ANN.Learning
             return deltas;
         }
 
-        public double[][] ComputeDeltas(int batchIndex, double[] target)
+        public double[][] ComputeDeltas(int batchIndex, double[][] averageActivations, double[] target)
         {
             int layerCount = _network.LayerCount;
             double[][] deltas = new double[layerCount][];
@@ -106,7 +106,7 @@ namespace ANN.Learning
                     {
                         weights[k] = _network[i + 1][k][j];
                     }
-                    deltas[i][j] = weights.Zip(prevDeltas, (w, d) => w * d).Sum() * neuronOutput * (1 - neuronOutput);
+                    deltas[i][j] = (weights.Zip(prevDeltas, (w, d) => w * d).Sum() + _beta * Maths.KLDivergenceDelta(_sparsity, averageActivations[i][j])) * neuronOutput * (1 - neuronOutput);
                 }
             }
 
@@ -156,6 +156,7 @@ namespace ANN.Learning
             int neuronCount, inputCount;
             double[][] deltas;
             double[][] partialDerivativesBias = new double[layerCount][];
+            double[][] averageActivations;
             double[][][] partialDerivativesWeights = new double[layerCount][][];
             double[][][] tmpPartialDerivatives;
 
@@ -173,10 +174,11 @@ namespace ANN.Learning
             }
 
             UpdateCachedActivations(input);
+            averageActivations = Networks.AverageActivations(_network, _cachedActivations);
 
             for (int i = 0; i < input.Length; i++)
             {
-                deltas = ComputeDeltas(i, target[i]);
+                deltas = ComputeDeltas(i, averageActivations, target[i]);
                 tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
 
                 partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, tmpPartialDerivatives);
