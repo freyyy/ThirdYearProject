@@ -1,4 +1,5 @@
 ﻿using ANN.Core;
+using ANN.Utils;
 using System;
 using System.Linq;
 
@@ -68,6 +69,37 @@ namespace ANN.Function
             }
 
             return averageSquaredError + (lambda / 2 * weightDecay);
+        }
+
+        public static double HalfSquaredErrorL2Sparsity(Network network, double[] averageActivations,
+            double sparsity, double lambda, double beta, double[][] actual, double[][] target)
+        {
+            if (actual.Length != target.Length)
+            {
+                throw new ArgumentException("Invalid vectors for squared error cost with L2 regularisation and sparsity. Make sure they are of the same length.");
+            }
+
+            for (int i = 0; i < actual.Length; i++)
+            {
+                if (actual[i].Length != target[i].Length)
+                {
+                    throw new ArgumentException("Invalid vectors for squared error cost with L2 regularisation and sparsity. Make sure they are of the same length.");
+                }
+            }
+
+            if (averageActivations.Length != network[0].NeuronCount)
+            {
+                throw new ArgumentException("Invalid size of average activations array.");
+            }
+
+            double cost = HalfSquaredErrorL2(network, lambda, actual, target);
+
+            for (int i = 0; i < averageActivations.Length; i++)
+            {
+                cost += beta * Maths.KLDivergence(sparsity, averageActivations[i]);
+            }
+
+            return cost;
         }
     }
 }
