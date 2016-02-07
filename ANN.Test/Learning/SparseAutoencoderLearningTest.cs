@@ -504,5 +504,65 @@ namespace ANN.Test.Learning
             Assert.AreEqual(gradientBias[0][1], partialDerivativesBias[0][1], 0.0001, "Gradient checking failed");
             Assert.AreEqual(gradientBias[1][0], partialDerivativesBias[1][0], 0.0001, "Gradient checking failed");
         }
+
+        [TestMethod]
+        public void UpdateNetworkParameters_UpdatedParameters()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.5, 0.0001, 0.1, 3);
+            double[][][] weightGradients = new double[][][]
+            {
+                new double[][]
+                {
+                    new double[] { 0.1, 0.2 },
+                    new double[] { -0.3, -0.4 }
+                },
+                new double[][]
+                {
+                    new double[] { 1, -1 }
+                }
+            };
+            double[][] biasGradients = new double[][]
+            {
+                new double[] { 0, 0 },
+                new double[] { 0 }
+            };
+            double[][][] prevNetworkWeights = new double[network.LayerCount][][];
+            double[][] prevNetworkBiases = new double[network.LayerCount][];
+
+            for (int i = 0; i < network.LayerCount; i++)
+            {
+                prevNetworkWeights[i] = new double[network[i].NeuronCount][];
+                prevNetworkBiases[i] = new double[network[i].NeuronCount];
+
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    prevNetworkWeights[i][j] = new double[network[i][j].InputCount];
+                    prevNetworkBiases[i][j] = network[i][j].Bias;
+
+                    for (int k = 0; k < network[i][j].InputCount; k++)
+                    {
+                        prevNetworkWeights[i][j][k] = network[i][j][k];
+                    }
+                }
+            }
+
+            sparseAutoencoder.UpdateNetworkParameters(weightGradients, biasGradients);
+
+            for (int i = 0; i < network.LayerCount; i++)
+            {
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    Assert.AreEqual(prevNetworkBiases[i][j] - sparseAutoencoder.Alpha * biasGradients[i][j], network[i][j].Bias, 0.0001, "Invalid network bias update");
+
+                    for (int k = 0; k < network[i][j].InputCount; k++)
+                    {
+                        Assert.AreEqual(prevNetworkWeights[i][j][k] - sparseAutoencoder.Alpha * weightGradients[i][j][k], network[i][j][k], 0.0001, "Invalid network updated");
+                    }
+                }
+            }
+        }
     }
 }

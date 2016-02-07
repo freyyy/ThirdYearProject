@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ANN.Core;
 using ANN.Utils;
+using ANN.Function;
 
 namespace ANN.Learning
 {
@@ -200,6 +201,49 @@ namespace ANN.Learning
             }
 
             return Tuple.Create(partialDerivativesWeights, partialDerivativesBias);
+        }
+
+        public Network UpdateNetworkParameters(double[][][] weightGradients, double[][] biasGradients)
+        {
+            for (int i = 0; i < _network.LayerCount; i++)
+            {
+                for (int j = 0; j < _network[i].NeuronCount; j++)
+                {
+                    _network[i][j].Bias -= _alpha * biasGradients[i][j];
+
+                    for (int k = 0; k < _network[i][j].InputCount; k++)
+                    {
+                        _network[i][j][k] -= _alpha * weightGradients[i][j][k];
+                    }
+                }
+            }
+
+            return _network;
+        }
+
+        public double RunEpoch(double[][] input)
+        {
+            double[][] output = new double[_batchSize][];
+            int layerCount = _network.LayerCount;
+
+            Tuple<double[][][], double[][]> gradients = ComputeBatchPartialDerivatives(input, input);
+
+            for (int i = 0; i < output.Length; i++)
+            {
+                output[i] = new double[_network[layerCount - 1].NeuronCount];
+
+                for (int j = 0; j < output[i].Length; j++)
+                {
+                    output[i][j] = _cachedActivations[i][layerCount - 1][j];
+                }
+            }
+
+            double[][] averageActivations = Networks.AverageActivations(_network, _cachedActivations);
+            double cost = CostFunctions.HalfSquaredErrorL2Sparsity(_network, averageActivations[0], _sparsity, _lambda, _beta, output, input);
+
+            UpdateNetworkParameters(gradients.Item1, gradients.Item2);
+
+            return cost;
         }
 
         public Network Network
