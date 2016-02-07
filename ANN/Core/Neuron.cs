@@ -25,10 +25,10 @@ namespace ANN.Core
             Random rnd = new Random();
             for(int i = 0; i < inputCount; i++)
             {
-                _weights[i] = (double) rnd.Next(-10, 10) / 10;
+                _weights[i] = (double) rnd.Next(-10, 10) / 100;
             }
 
-            _bias = (double)rnd.Next(-10, 10) / 10;
+            _bias = (double)rnd.Next(-10, 10) / 100;
         }
 
         public double this[int i]

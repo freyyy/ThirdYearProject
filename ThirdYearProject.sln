@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANN", "ANN\ANN.csproj", "{53F3D759-3D36-4BAF-A2C3-F50DB461FC8C}"
 EndProject
@@ -15,6 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackpropagationDemo", "Back
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoencoderDemo", "AutoencoderDemo\AutoencoderDemo.csproj", "{4240F8CF-03BA-4579-AD59-E90460FE9197}"
+	ProjectSection(ProjectDependencies) = postProject
+		{53F3D759-3D36-4BAF-A2C3-F50DB461FC8C} = {53F3D759-3D36-4BAF-A2C3-F50DB461FC8C}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANN.Test", "ANN.Test\ANN.Test.csproj", "{252B9EA7-78F8-4857-97C6-655D39BC67D3}"
 EndProject
