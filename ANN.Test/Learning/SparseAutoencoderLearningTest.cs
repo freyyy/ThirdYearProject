@@ -16,18 +16,20 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(4, 5, sigmoidFunction), new Layer(3, 4, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 0.5);
 
             int batchSize = sparseAutoencoder.BatchSize;
             double lambda = sparseAutoencoder.Lambda;
             double sparsity = sparseAutoencoder.Sparsity;
             double beta = sparseAutoencoder.Beta;
+            double alpha = sparseAutoencoder.Alpha;
             double[][][] cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(1, batchSize, 0, "Inalid batch size");
             Assert.AreEqual(0, lambda, 0.0001, "Invalid lambda");
             Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
             Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
+            Assert.AreEqual(0.5, alpha, 0.0001, "Invalid alpha");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
             
             for (int i = 0; i < batchSize; i++)
@@ -40,18 +42,20 @@ namespace ANN.Test.Learning
                 }
             }
 
-            sparseAutoencoder = new SparseAutoencoderLearning(network, 32);
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.5);
 
             batchSize = sparseAutoencoder.BatchSize;
             lambda = sparseAutoencoder.Lambda;
             sparsity = sparseAutoencoder.Sparsity;
             beta = sparseAutoencoder.Beta;
+            alpha = sparseAutoencoder.Alpha;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
             Assert.AreEqual(0, lambda, 0.0001, "Invalid lambda");
             Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
             Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
+            Assert.AreEqual(0.5, alpha, 0.0001, "Invalid alpha");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
@@ -64,18 +68,20 @@ namespace ANN.Test.Learning
                 }
             }
 
-            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.001);
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.5, 0.001);
 
             batchSize = sparseAutoencoder.BatchSize;
             lambda = sparseAutoencoder.Lambda;
             sparsity = sparseAutoencoder.Sparsity;
             beta = sparseAutoencoder.Beta;
+            alpha = sparseAutoencoder.Alpha;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
             Assert.AreEqual(0.001, lambda, 0.0001, "Invalid lambda");
             Assert.AreEqual(0, sparsity, 0.0001, "Invalid sparsity");
             Assert.AreEqual(0, beta, 0.0001, "Invalid beta");
+            Assert.AreEqual(0.5, alpha, 0.0001, "Invalid alpha");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
@@ -88,18 +94,20 @@ namespace ANN.Test.Learning
                 }
             }
 
-            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.001, 0.1, 3);
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 32, 0.5, 0.001, 0.1, 3);
 
             batchSize = sparseAutoencoder.BatchSize;
             lambda = sparseAutoencoder.Lambda;
             sparsity = sparseAutoencoder.Sparsity;
             beta = sparseAutoencoder.Beta;
+            alpha = sparseAutoencoder.Alpha;
             cachedActivations = sparseAutoencoder.CachedActivations;
 
             Assert.AreEqual(32, batchSize, 0, "Inalid batch size");
             Assert.AreEqual(0.001, lambda, 0.0001, "Invalid lambda");
             Assert.AreEqual(0.1, sparsity, 0.0001, "Invalid sparsity");
             Assert.AreEqual(3, beta, 0.0001, "Invalid beta");
+            Assert.AreEqual(0.5, alpha, 0.0001, "Invalid alpha");
             Assert.AreEqual(batchSize, cachedActivations.Length, 0, "Invalid activations cache size");
 
             for (int i = 0; i < batchSize; i++)
@@ -119,7 +127,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 0.5);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][][] expected = new double[][][]
             {
@@ -152,7 +160,7 @@ namespace ANN.Test.Learning
             Assert.AreEqual(expected[0][1][0], cachedActivations[0][1][0], 0.0001, "Invalid cached activation value");
 
             input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.6, 0.7 } };
-            sparseAutoencoder = new SparseAutoencoderLearning(network, 2);
+            sparseAutoencoder = new SparseAutoencoderLearning(network, 2, 0.5);
 
             cachedActivations = sparseAutoencoder.UpdateCachedActivations(input);
 
@@ -171,7 +179,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 2);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 2, 0.5);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
 
             layers[0][0][0] = 0.1;
@@ -193,7 +201,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 0.5);
             double[] input = new double[] { 0.5, 0.6 };
             double[] target = new double[] { 1 };
             double[] expected = new double[] { -0.0875168367272141 };
@@ -219,7 +227,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 0);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0.5, 0, 0.1, 0);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
             double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
@@ -252,7 +260,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 0);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0.5, 0, 0.1, 0);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
             double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
@@ -298,7 +306,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0, 0.1, 3);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 1, 0.5, 0, 0.1, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 } };
             double[][] target = new double[][] { new double[] { 1 } };
             double[][] averageActivations = new double[][] { new double[] { 0.5, 0.5 }, new double[] { 0.5 } };
@@ -382,7 +390,7 @@ namespace ANN.Test.Learning
             ActivationFunction sigmoidFunction = new SigmoidFunction();
             Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(1, 2, sigmoidFunction) };
             Network network = new Network(layers);
-            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.0001, 0.1, 3);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.5, 0.0001, 0.1, 3);
             double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
             double[][] target = new double[][] { new double[] { 1 }, new double[] { 0 }, new double[] { 0.5 } };
             double[][][] gradientWeights = new double[][][]
