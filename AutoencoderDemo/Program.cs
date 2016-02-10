@@ -9,32 +9,54 @@ namespace AutoencoderDemo
     {
         static void Main(string[] args)
         {
-            double[][] input = { new double[] { 0, 0, 1, 0 }, new double[] { 0, 1, 0, 0 }, new double[] { 1, 0, 0, 0 }, new double[] { 0, 0, 0, 1 } };
+            double[][] input = new double[][]
+            {
+                new double[] { 1, 1, 1, 0, 0, 0 },
+                new double[] { 1, 0, 1, 0, 0, 0 },
+                new double[] { 1, 1, 1, 0, 0, 0 },
+                new double[] { 0, 0, 1, 1, 1, 0 },
+                new double[] { 0, 0, 1, 0, 1, 0 },
+                new double[] { 0, 0, 1, 1, 1, 0 },
+            };
+            double lastError = 1;
             double error = 1;
+            double delta = 0.1;
             int epoch = 0;
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(2, 4, f);
-            Layer layer2 = new Layer(4, 2, f);
+            Layer layer1 = new Layer(2, 6, f);
+            Layer layer2 = new Layer(6, 2, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 4, 0.5, 0.0001, 0.2, 3);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 6, 1, 0.0001, 0.5, 0.1);
 
-            while (epoch < 10000)
+            Console.WriteLine("Hidden unit 1 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][0].Bias, network[0][0][0], network[0][0][1], network[0][0][2], network[0][0][3], network[0][0][4], network[0][0][5]);
+            Console.WriteLine("Hidden unit 2 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][1].Bias, network[0][1][0], network[0][1][1], network[0][1][2], network[0][1][3], network[0][1][4], network[0][1][5]);
+
+            while (epoch < 2000)
             {
                 error = sae.RunEpoch(input);
                 epoch++;
                 Console.WriteLine("Error after {0} epochs: {1}", epoch, error);
+                delta = lastError - error;
+                lastError = error;
             }
             Console.WriteLine("Training complete after {0} epochs using the Sparse Autoencoder training regime.", epoch);
             Console.WriteLine("Testing");
-            network.Update(new double[] { 1, 0, 0, 0 });
-            Console.WriteLine("{0} {1} {2} {3} {4} {5}", network[0][0].Output, network[0][1].Output, network[1][0].Output, network[1][1].Output, network[1][2].Output, network[1][3].Output);
-            network.Update(new double[] { 0, 1, 0, 0 });
-            Console.WriteLine("{0} {1} {2} {3} {4} {5}", network[0][0].Output, network[0][1].Output, network[1][0].Output, network[1][1].Output, network[1][2].Output, network[1][3].Output);
-            network.Update(new double[] { 0, 0, 1, 0 });
-            Console.WriteLine("{0} {1} {2} {3} {4} {5}", network[0][0].Output, network[0][1].Output, network[1][0].Output, network[1][1].Output, network[1][2].Output, network[1][3].Output);
-            network.Update(new double[] { 0, 0, 0, 1 });
-            Console.WriteLine("{0} {1} {2} {3} {4} {5}", network[0][0].Output, network[0][1].Output, network[1][0].Output, network[1][1].Output, network[1][2].Output, network[1][3].Output);
+
+            Console.WriteLine("Hidden unit 1 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][0].Bias, network[0][0][0], network[0][0][1], network[0][0][2], network[0][0][3], network[0][0][4], network[0][0][5]);
+            Console.WriteLine("Hidden unit 2 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][1].Bias, network[0][1][0], network[0][1][1], network[0][1][2], network[0][1][3], network[0][1][4], network[0][1][5]);
+            network.Update(new double[] { 1, 1, 0, 0, 0, 0 });
+            Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
+            network.Update(new double[] { 0, 0, 0, 1, 1, 0 });
+            Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
+            network.Update(new double[] { 0, 0, 0, 1, 1, 0 });
+            Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
+            //network.Update(new double[] { 0, 1 });
+            //Console.WriteLine("{0} {1} {2}", network[0][0].Output, network[1][0].Output, network[1][1].Output);
+            //network.Update(new double[] { 1, 0 });
+            //Console.WriteLine("{0} {1} {2}", network[0][0].Output, network[1][0].Output, network[1][1].Output);
+            //network.Update(new double[] { 1, 1 });
+            //Console.WriteLine("{0} {1} {2}", network[0][0].Output, network[1][0].Output, network[1][1].Output);
 
             //List<int[]> trainingData = new List<int[]>();
             //List<int> labels = new List<int>();
