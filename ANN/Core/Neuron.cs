@@ -47,6 +47,11 @@ namespace ANN.Core
             set { _weights[i] = value; }
         }
 
+        public double[] Weights
+        {
+            get { return _weights; }
+        }
+
         public double Bias
         {
             get { return _bias; }
