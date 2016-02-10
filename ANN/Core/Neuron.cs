@@ -18,9 +18,9 @@ namespace ANN.Core
 
         private static readonly Random rnd = new Random();
 
-        private static double MIN_WEIGHT = -0.01;
+        private static double MIN_WEIGHT = -0.4;
 
-        private static double MAX_WEIGHT = 0.01;
+        private static double MAX_WEIGHT = 0.4;
 
         public Neuron(int inputCount, ActivationFunction function)
         {

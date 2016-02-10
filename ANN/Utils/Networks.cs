@@ -54,5 +54,17 @@ namespace ANN.Utils
 
             return average;
         }
+
+        public static double[] ComputeMaximumActivationInput(double[] weights)
+        {
+            double norm = Math.Sqrt(weights.Select(w => w * w).Sum());
+
+            return weights.Select(w => w / norm).ToArray();
+        }
+
+        public static void ExportHiddenWeightsToBitmap(Network network)
+        {
+
+        }
     }
 }

@@ -110,5 +110,29 @@ namespace ANN.Test.Utils
                 }
             }
         }
+
+        [TestMethod]
+        public void ComputeMaximumActivationInput_ReturnsInput()
+        {
+            double[] weights = new double[] { 0.3, 0.9, -0.1, -0.4 };
+            double[] actual = Networks.ComputeMaximumActivationInput(weights);
+
+            Assert.AreEqual(weights.Length, actual.Length, 0, "Incorrect maximum activation input length");
+
+            for (int i = 0; i < actual.Length; i++)
+            {
+                Assert.AreEqual(weights[i] / Math.Sqrt(1.07), actual[i], 0.0001, "Incorrect maximum activation input");
+            }
+
+            weights = new double[] { -4.2, -3.1, -2.6, -1.9, 0, 1.1, 2.7, 3.3, 4.9 };
+            actual = Networks.ComputeMaximumActivationInput(weights);
+
+            Assert.AreEqual(weights.Length, actual.Length, 0, "Incorrect maximum activation input length");
+
+            for (int i = 0; i < actual.Length; i++)
+            {
+                Assert.AreEqual(weights[i] / Math.Sqrt(81.02), actual[i], 0.0001, "Incorrect maximum activation input");
+            }
+        }
     }
 }
