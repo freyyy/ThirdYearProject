@@ -1,9 +1,9 @@
 ﻿using ANN.Core;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ANN.Utils
 {
@@ -67,9 +67,48 @@ namespace ANN.Utils
             return input.Select(i => (i - input.Min()) * (max - min) / (input.Max() - input.Min()) + min).ToArray();
         }
 
-        public static void ExportHiddenWeightsToBitmap(Network network)
+        public static void ExportHiddenWeightsToBitmap(Network network, int width, int height, int wdiv, int hdiv)
         {
+            if (network.LayerCount < 1)
+            {
+                throw new ArgumentException("The network does not contain any layers");
+            }
 
+            double[] normalisedMaxActivation;
+            int[] intNormalisedMaxActivation;
+            int value;
+            int wstep = width / wdiv;
+            int hstep = height / hdiv;
+            string filename;
+            Bitmap bmp;
+
+            for (int i = 0; i < network.LayerCount - 1; i++)
+            {
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    bmp = new Bitmap(width, height);
+
+                    normalisedMaxActivation = NormaliseNetworkInput(ComputeMaximumActivationInput(network[i][j].Weights), 0, 1);
+                    intNormalisedMaxActivation = normalisedMaxActivation.Select(n => (int)(n * 255)).ToArray();
+
+                    using (Graphics g = Graphics.FromImage(bmp))
+                    {
+                        for (int w = 0; w < wdiv; w++)
+                        {
+                            for (int h = 0; h < hdiv; h++)
+                            {
+                                value = intNormalisedMaxActivation[w + h * wdiv];
+                                // bmp.SetPixel(w, h, Color.FromArgb(value, value, value));
+                                g.FillRectangle(new SolidBrush(Color.FromArgb(value, value, value)),
+                                    new Rectangle(w * wstep, h * hstep, wstep, hstep));
+                            }
+                        }
+                    }
+
+                    filename = string.Format("layer{0}_unit{1}.bmp", i, j);
+                    bmp.Save(filename);
+                }
+            }
         }
     }
 }

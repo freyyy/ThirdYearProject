@@ -1,6 +1,7 @@
 ﻿using ANN.Core;
 using ANN.Function;
 using ANN.Learning;
+using ANN.Utils;
 using System;
 
 namespace AutoencoderDemo
@@ -32,7 +33,7 @@ namespace AutoencoderDemo
             Console.WriteLine("Hidden unit 1 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][0].Bias, network[0][0][0], network[0][0][1], network[0][0][2], network[0][0][3], network[0][0][4], network[0][0][5]);
             Console.WriteLine("Hidden unit 2 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][1].Bias, network[0][1][0], network[0][1][1], network[0][1][2], network[0][1][3], network[0][1][4], network[0][1][5]);
 
-            while (epoch < 2000)
+            while (epoch < 1000)
             {
                 error = sae.RunEpoch(input);
                 epoch++;
@@ -51,6 +52,8 @@ namespace AutoencoderDemo
             Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
             network.Update(new double[] { 0, 0, 0, 1, 1, 0 });
             Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
+
+            Networks.ExportHiddenWeightsToBitmap(network, 600, 100, 6, 1);
             //network.Update(new double[] { 0, 1 });
             //Console.WriteLine("{0} {1} {2}", network[0][0].Output, network[1][0].Output, network[1][1].Output);
             //network.Update(new double[] { 1, 0 });
