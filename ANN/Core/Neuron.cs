@@ -16,19 +16,20 @@ namespace ANN.Core
 
         private ActivationFunction _function;
 
+        private static readonly Random rnd = new Random();
+
         public Neuron(int inputCount, ActivationFunction function)
         {
             _weights = new double[inputCount];
             _inputCount = inputCount;
             _function = function;
 
-            Random rnd = new Random();
             for(int i = 0; i < inputCount; i++)
             {
-                _weights[i] = (double) rnd.Next(-10, 10) / 100;
+                _weights[i] = (double) rnd.Next(-100, 100) / 10000;
             }
 
-            _bias = (double)rnd.Next(-10, 10) / 100;
+            _bias = (double)rnd.Next(-100, 100) / 10000;
         }
 
         public double this[int i]
