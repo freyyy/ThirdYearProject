@@ -62,6 +62,11 @@ namespace ANN.Utils
             return weights.Select(w => w / norm).ToArray();
         }
 
+        public static double[] NormaliseNetworkInput(double[] input, double min, double max)
+        {
+            return input.Select(i => (i - input.Min()) * (max - min) / (input.Max() - input.Min()) + min).ToArray();
+        }
+
         public static void ExportHiddenWeightsToBitmap(Network network)
         {
 
