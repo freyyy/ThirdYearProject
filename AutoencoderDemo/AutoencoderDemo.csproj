@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Resources\images.csv" />
     <None Include="Resources\kaggle_train.csv" />
   </ItemGroup>
   <ItemGroup>
