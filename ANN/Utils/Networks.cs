@@ -62,11 +62,6 @@ namespace ANN.Utils
             return weights.Select(w => w / norm).ToArray();
         }
 
-        public static double[] NormaliseNetworkInput(double[] input, double min, double max)
-        {
-            return input.Select(i => (i - input.Min()) * (max - min) / (input.Max() - input.Min()) + min).ToArray();
-        }
-
         public static void ExportHiddenWeightsToBitmap(Network network, int width, int height, int wdiv, int hdiv)
         {
             if (network.LayerCount < 1)
@@ -88,7 +83,7 @@ namespace ANN.Utils
                 {
                     bmp = new Bitmap(width, height);
 
-                    normalisedMaxActivation = NormaliseNetworkInput(ComputeMaximumActivationInput(network[i][j].Weights), 0, 1);
+                    normalisedMaxActivation = Maths.Rescale(ComputeMaximumActivationInput(network[i][j].Weights), 0, 1);
                     intNormalisedMaxActivation = normalisedMaxActivation.Select(n => (int)(n * 255)).ToArray();
 
                     using (Graphics g = Graphics.FromImage(bmp))

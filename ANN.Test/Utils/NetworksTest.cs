@@ -134,18 +134,5 @@ namespace ANN.Test.Utils
                 Assert.AreEqual(weights[i] / Math.Sqrt(81.02), actual[i], 0.0001, "Incorrect maximum activation input");
             }
         }
-
-        [TestMethod]
-        public void NormaliseNetworkInput_ReturnsNormalisedInput()
-        {
-            double[] input = { -3, -2, 1, 4 };
-            double[] actual = Networks.NormaliseNetworkInput(input, 0, 1);
-
-            Assert.AreEqual(input.Length, actual.Length, 0, "Incorrect normalised input length");
-            Assert.AreEqual(0.0, actual[0], 0.0001, "Incorrect normalised input");
-            Assert.AreEqual(1.0 / 7, actual[1], 0.0001, "Incorrect normalised input");
-            Assert.AreEqual(4.0 / 7, actual[2], 0.0001, "Incorrect normalised input");
-            Assert.AreEqual(1.0, actual[3], 0.0001, "Incorrect normalised input");
-        }
     }
 }

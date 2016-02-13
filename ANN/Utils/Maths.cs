@@ -25,5 +25,53 @@ namespace ANN.Utils
             }
             return -1 * x / y + (1 - x) / (1 - y);
         }
+
+        public static double StandardDeviation(double[] input)
+        {
+            double ret = 0;
+            int count = input.Count();
+
+            if (count > 1)
+            {
+                double average = input.Average();
+                double sum = input.Sum(i => (i - average) * (i - average));
+
+                ret = Math.Sqrt(sum / count);
+            }
+            
+            return ret;
+        }
+
+        public static double[][] RemoveDcComponent(double[][] input)
+        {
+            double mean;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                mean = input[i].Average();
+                input[i] = input[i].Select(p => p - mean).ToArray();
+            }
+
+            return input;
+        }
+
+        public static double[] Rescale(double[] input, double minValue, double maxValue)
+        {
+            return input.Select(i => (i - input.Min()) * (maxValue - minValue) / (input.Max() - input.Min()) + minValue).ToArray();
+        }
+
+        public static double[][] TruncateAndRescale(double[][] input, double minValue, double maxValue)
+        {
+            double pstd;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                pstd = 3 * StandardDeviation(input[i]);
+                input[i] = input[i].Select(p => Math.Max(Math.Min(p, pstd), -pstd) / pstd).ToArray();
+                input[i] = Rescale(input[i], 0.1, 0.9);
+            }
+
+            return input;
+        }
     }
 }
