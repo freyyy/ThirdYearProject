@@ -6,40 +6,69 @@ using LumenWorks.Framework.IO.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AutoencoderDemo
 {
     public class Program
     {
-        private static void GetSamples()
+        public static Random rng = new Random();
+
+        private static double[][] GetSamples()
         {
-            List<int[]> trainingData = new List<int[]>();
-            List<int> labels = new List<int>();
+            List<double[]> samples = new List<double[]>();
 
             using (CsvReader csv =
-                   new CsvReader(new StringReader(Properties.Resources.images), true))
+                   new CsvReader(new StringReader(Properties.Resources.images), false))
             {
                 int fieldCount = csv.FieldCount;
                 Console.WriteLine("Field count: {0}", fieldCount);
 
-                string[] headers = csv.GetFieldHeaders();
-
                 while (csv.ReadNextRecord())
                 {
-                    List<int> trainingExample = new List<int>();
+                    List<double> trainingExample = new List<double>();
 
-                    labels.Add(int.Parse(csv[0]));
-                    for (int i = 1; i < fieldCount; i++)
+                    for (int i = 0; i < fieldCount; i++)
                     {
-                        trainingExample.Add(int.Parse(csv[i]));
+                        trainingExample.Add(double.Parse(csv[i]));
                     }
 
-                    trainingData.Add(trainingExample.ToArray());
+                    samples.Add(trainingExample.ToArray());
                 }
             }
 
-            Console.WriteLine("Total examples: {0}", trainingData.Count);
-            Console.WriteLine("Total labels:   {0}", labels.Count);
+            Console.WriteLine("Total examples: {0}", samples.Count);
+            return samples.ToArray();
+        }
+
+        private static double[][] GetPatches(double[][] samples, int samplesWidth, int samplesHeight, int patchesNum, int patchesSize)
+        {
+            List<double[]> patches = new List<double[]>();
+            int patchesPerSample = patchesNum / samples.Length;
+            double[] patch;
+
+            for (int i = 0; i < samples.Length; i++)
+            {
+                for (int j = 0; j < patchesPerSample; j++)
+                {
+                    patch = new double[patchesSize * patchesSize];
+                    int leftCornerWidth = rng.Next(0, samplesWidth - patchesSize);
+                    int leftCornerHeight = rng.Next(0, samplesHeight - patchesSize);
+                    int leftCorner = leftCornerHeight * samplesWidth + leftCornerWidth;
+
+                    for (int w = 0; w < patchesSize; w++)
+                    {
+                        for (int h = 0; h < patchesSize; h++)
+                        {
+                            patch[h * patchesSize + w] = samples[i][leftCorner + w + h * samplesWidth];
+                        }
+                    }
+
+                    patches.Add(patch);
+                }
+            }
+
+            return patches.ToArray();
         }
 
         public static void Main(string[] args)
@@ -67,7 +96,7 @@ namespace AutoencoderDemo
             Console.WriteLine("Hidden unit 1 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][0].Bias, network[0][0][0], network[0][0][1], network[0][0][2], network[0][0][3], network[0][0][4], network[0][0][5]);
             Console.WriteLine("Hidden unit 2 weights: {0} {1} {2} {3} {4} {5} {6}", network[0][1].Bias, network[0][1][0], network[0][1][1], network[0][1][2], network[0][1][3], network[0][1][4], network[0][1][5]);
 
-            while (epoch < 1000)
+            while (epoch < 0)
             {
                 error = sae.RunEpoch(input);
                 epoch++;
@@ -88,6 +117,9 @@ namespace AutoencoderDemo
             Console.WriteLine("{0} {1}", network[0][0].Output, network[0][1].Output);
 
             Networks.ExportHiddenWeightsToBitmap(network, 600, 100, 6, 1);
+
+            double[][] samples = GetSamples();
+            double[][] patches = GetPatches(samples, 512, 512, 10000, 8);
         }
     }
 }
