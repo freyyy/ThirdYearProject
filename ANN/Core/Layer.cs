@@ -1,4 +1,5 @@
 ﻿using ANN.Function;
+using System.Threading.Tasks;
 
 namespace ANN.Core
 {
@@ -48,10 +49,10 @@ namespace ANN.Core
         {
             double[] output = new double[NeuronCount];
 
-            for (int i = 0; i < NeuronCount; i++)
+            Parallel.For(0, NeuronCount, i =>
             {
                 output[i] = _neurons[i].Update(input);
-            }
+            });
 
             return _output = output;
         }

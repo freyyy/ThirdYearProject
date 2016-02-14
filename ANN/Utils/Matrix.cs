@@ -34,7 +34,21 @@ namespace ANN.Utils
                 }
             }
 
-            return xs.Zip(ys, (x2d, y2d) => x2d.Zip(y2d, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray()).ToArray();
+            double[][][] result = xs.Select(x2d => x2d.Select(x1d => x1d.ToArray()).ToArray()).ToArray();
+
+            for (int i = 0; i < result.Length; i++)
+            {
+               for (int j = 0; j < result[i].Length; j++)
+               {
+                   for (int k = 0; k < result[i][j].Length; k++)
+                   {
+                       result[i][j][k] += ys[i][j][k];
+                   }
+               }
+           }
+
+            //return xs.Zip(ys, (x2d, y2d) => x2d.Zip(y2d, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray()).ToArray();
+            return result;
         }
 
         public static double[][] AddMatrices(double[][] xs, double[][] ys)
@@ -52,7 +66,18 @@ namespace ANN.Utils
                 }
             }
 
-            return xs.Zip(ys, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray();
+            double[][] result = xs.Select(x1d => x1d.ToArray()).ToArray();
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                for (int j = 0; j < result[i].Length; j++)
+                {
+                    result[i][j] += ys[i][j];
+                }
+            }
+
+            // return xs.Zip(ys, (x1d, y1d) => x1d.Zip(y1d, (x, y) => x + y).ToArray()).ToArray();
+            return result;
         }
     }
 }

@@ -83,17 +83,16 @@ namespace ANN.Utils
                 {
                     bmp = new Bitmap(width, height);
 
-                    normalisedMaxActivation = Maths.Rescale(ComputeMaximumActivationInput(network[i][j].Weights), 0, 1);
+                    normalisedMaxActivation = Maths.Rescale(network[i][j].Weights, 0, 1);
                     intNormalisedMaxActivation = normalisedMaxActivation.Select(n => (int)(n * 255)).ToArray();
 
                     using (Graphics g = Graphics.FromImage(bmp))
                     {
-                        for (int w = 0; w < wdiv; w++)
+                        for (int h = 0; h < hdiv; h++)
                         {
-                            for (int h = 0; h < hdiv; h++)
+                            for (int w = 0; w < wdiv; w++)
                             {
                                 value = intNormalisedMaxActivation[w + h * wdiv];
-                                // bmp.SetPixel(w, h, Color.FromArgb(value, value, value));
                                 g.FillRectangle(new SolidBrush(Color.FromArgb(value, value, value)),
                                     new Rectangle(w * wstep, h * hstep, wstep, hstep));
                             }
