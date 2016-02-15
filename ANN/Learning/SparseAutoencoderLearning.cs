@@ -179,14 +179,14 @@ namespace ANN.Learning
             UpdateCachedActivations(input);
             averageActivations = Networks.AverageActivations(_network, _cachedActivations);
 
-            Parallel.For(0, input.Length, i =>
+            for(int i = 0; i< input.Length; i++)
             {
                deltas = ComputeDeltas(i, averageActivations, target[i]);
                tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
 
                partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, tmpPartialDerivatives);
                partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
-            });
+            }
 
             for (int i = 0; i < _network.LayerCount; i++)
             {
