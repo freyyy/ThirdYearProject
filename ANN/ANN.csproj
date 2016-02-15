@@ -51,6 +51,7 @@
     <Compile Include="Learning\BackpropagationLearning.cs" />
     <Compile Include="Learning\DeltaRuleLearning.cs" />
     <Compile Include="Learning\LearningStrategy.cs" />
+    <Compile Include="Learning\SparseAutoencoderAdapter.cs" />
     <Compile Include="Learning\PerceptronLearning.cs" />
     <Compile Include="Learning\SparseAutoencoderLearning.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
