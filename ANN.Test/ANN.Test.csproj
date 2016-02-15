@@ -59,6 +59,7 @@
     <Compile Include="Function\ThresholdFunctionTest.cs" />
     <Compile Include="Function\CostFunctionsTest.cs" />
     <Compile Include="Learning\SparseAutoencoderLearningTest.cs" />
+    <Compile Include="Learning\SparseAutoencoderAdapterTest.cs" />
     <Compile Include="Utils\MatrixTest.cs" />
     <Compile Include="Utils\NetworksTest.cs" />
     <Compile Include="Utils\MathsTest.cs" />
