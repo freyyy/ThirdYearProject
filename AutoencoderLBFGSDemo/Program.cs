@@ -81,10 +81,10 @@ namespace AutoencoderLBFGSDemo
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(25, 64, f);
-            Layer layer2 = new Layer(64, 25, f);
+            Layer layer1 = new Layer(20, 64, f);
+            Layer layer2 = new Layer(64, 20, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0001, 0.01, 3);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.01, 6);
             SparseAutoencoderAdapter saeAdapter = new SparseAutoencoderAdapter(sae, patches);
 
             double[] x = saeAdapter.GetFunctionParameters();
@@ -93,14 +93,14 @@ namespace AutoencoderLBFGSDemo
             double epsf = 0;
             double epsx = 0;
             int maxits = 400;
-            alglib.mincgstate state;
-            alglib.mincgreport rep;
+            alglib.minlbfgsstate state;
+            alglib.minlbfgsreport rep;
 
-            alglib.mincgcreate(x, out state);
-            alglib.mincgsetcond(state, epsg, epsf, epsx, maxits);
-            alglib.mincgsetxrep(state, true);
-            alglib.mincgoptimize(state, saeAdapter.FunctionValueAndGradient, saeAdapter.PrintProgress, null);
-            alglib.mincgresults(state, out x, out rep);
+            alglib.minlbfgscreate(100, x, out state);
+            alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
+            alglib.minlbfgssetxrep(state, true);
+            alglib.minlbfgsoptimize(state, saeAdapter.FunctionValueAndGradient, saeAdapter.PrintProgress, null);
+            alglib.minlbfgsresults(state, out x, out rep);
 
             Console.WriteLine("{0}", rep.terminationtype);
             //Console.WriteLine("{0}", alglib.ap.format(x, 2));
