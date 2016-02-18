@@ -70,5 +70,36 @@ namespace ANN.Test.Learning
 
             Assert.AreEqual(expectedValue, func, 0.0001, "Value updated incorrectly");
         }
+
+        [TestMethod]
+        public void GetFunctionParameters_ReturnsParameters()
+        {
+            ActivationFunction sigmoidFunction = new SigmoidFunction();
+            Layer[] layers = new Layer[] { new Layer(2, 2, sigmoidFunction), new Layer(2, 2, sigmoidFunction) };
+            Network network = new Network(layers);
+            SparseAutoencoderLearning sparseAutoencoder = new SparseAutoencoderLearning(network, 3, 0.5, 0.0001, 0.1, 3);
+            double[][] input = new double[][] { new double[] { 0.5, 0.6 }, new double[] { 0.1, 0.2 }, new double[] { 0.3, 0.3 } };
+            double[][] output = new double[input.Length][];
+
+            SparseAutoencoderAdapter sparseAutoencoderAdapter = new SparseAutoencoderAdapter(sparseAutoencoder, input);
+
+            double[] parameters = sparseAutoencoderAdapter.GetFunctionParameters();
+            int index = 0;
+
+            Assert.AreEqual(12, parameters.Length, 0, "Invalid parameters length");
+
+            for (int i = 0; i < network.LayerCount; i++)
+            {
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    Assert.AreEqual(network[i][j].Bias, parameters[index++], 0.0001, "Invalid bias parameter");
+
+                    for (int k = 0; k < network[i][j].InputCount; k++)
+                    {
+                        Assert.AreEqual(network[i][j][k], parameters[index++], 0.0001, "Invalid weight parameter");
+                    }
+                }
+            }
+        }
     }
 }
