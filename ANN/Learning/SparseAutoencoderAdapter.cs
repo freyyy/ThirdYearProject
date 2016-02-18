@@ -83,11 +83,55 @@ namespace ANN.Learning
             UpdateFunctionParameters(x);
             ComputeFunctionGradients(grad);
             ComputeFunctionValue(ref func);
+
+            //_iterations++;
+            _lastValue = func;
+
+            //PrintProgress();
+        }
+
+        public void FunctionValueOnly(double[] x, ref double func, object obj)
+        {
+            UpdateFunctionParameters(x);
+            _sparseAutoencoder.UpdateCachedActivations(_input);
+            ComputeFunctionValue(ref func);
+
+            //_iterations++;
+            _lastValue = func;
+
+            //PrintProgress();
+        }
+
+        public double[] GetFunctionParameters()
+        {
+            List<double> parameters = new List<double>();
+            Network network = _sparseAutoencoder.Network;
+
+            for (int i = 0; i < network.LayerCount; i++)
+            {
+                for (int j = 0; j < network[i].NeuronCount; j++)
+                {
+                    parameters.Add(network[i][j].Bias);
+
+                    for (int k = 0; k < network[i][j].InputCount; k++)
+                    {
+                        parameters.Add(network[i][j][k]);
+                    }
+                }
+            }
+
+            return parameters.ToArray();
+        }
+
+        public void PrintProgress(double[] arg, double func, object obj)
+        {
+            _iterations++;
+            Console.WriteLine("Function value after {0} iterations: {1}", _iterations, func);
         }
 
         public void PrintProgress()
         {
-
+            Console.WriteLine("Error after {0} evaluations: {1}", _iterations, _lastValue);
         }
 
         public SparseAutoencoderLearning SparseAutoencoderLearning
