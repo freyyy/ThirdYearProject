@@ -81,14 +81,13 @@ namespace AutoencoderLBFGSDemo
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(20, 64, f);
-            Layer layer2 = new Layer(64, 20, f);
+            Layer layer1 = new Layer(25, 64, f);
+            Layer layer2 = new Layer(64, 25, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.01, 6);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.05, 6);
             SparseAutoencoderAdapter saeAdapter = new SparseAutoencoderAdapter(sae, patches);
 
             double[] x = saeAdapter.GetFunctionParameters();
-            double[] y = saeAdapter.GetFunctionParameters();
             double epsg = 0.0000000001;
             double epsf = 0;
             double epsx = 0;
@@ -96,7 +95,7 @@ namespace AutoencoderLBFGSDemo
             alglib.minlbfgsstate state;
             alglib.minlbfgsreport rep;
 
-            alglib.minlbfgscreate(100, x, out state);
+            alglib.minlbfgscreate(3, x, out state);
             alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
             alglib.minlbfgssetxrep(state, true);
             alglib.minlbfgsoptimize(state, saeAdapter.FunctionValueAndGradient, saeAdapter.PrintProgress, null);
@@ -106,8 +105,6 @@ namespace AutoencoderLBFGSDemo
             //Console.WriteLine("{0}", alglib.ap.format(x, 2));
 
             Networks.ExportHiddenWeightsToBitmap(network, 128, 128, 8, 8);
-
-            Console.ReadLine();
         }
     }
 }

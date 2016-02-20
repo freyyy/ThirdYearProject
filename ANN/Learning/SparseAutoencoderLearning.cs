@@ -17,6 +17,7 @@ namespace ANN.Learning
         private double _beta;
         private double _lambda;
         private double _alpha;
+        private bool _checkGradient;
         private double[][][] _cachedActivations;
 
         public SparseAutoencoderLearning(Network network, double alpha) : this(network, 1, alpha) { }
@@ -25,7 +26,7 @@ namespace ANN.Learning
 
         public SparseAutoencoderLearning(Network network, int batchSize, double alpha, double lambda) : this(network, batchSize, alpha, lambda, 0, 0) { }
 
-        public SparseAutoencoderLearning(Network network, int batchSize, double alpha, double lambda, double sparsity, double beta)
+        public SparseAutoencoderLearning(Network network, int batchSize, double alpha, double lambda, double sparsity, double beta, bool checkGradient = false)
         {
             _network = network;
             _batchSize = batchSize;
@@ -33,6 +34,7 @@ namespace ANN.Learning
             _lambda = lambda;
             _sparsity = sparsity;
             _beta = beta;
+            _checkGradient = checkGradient;
 
             _cachedActivations = new double[batchSize][][];
 
@@ -194,13 +196,134 @@ namespace ANN.Learning
                 {
                     for (int k = 0; k < _network[i][j].InputCount; k++)
                     {
-                        partialDerivativesWeights[i][j][k] = (partialDerivativesWeights[i][j][k] / input.Length) +_lambda * _network[i][j][k];
+                        partialDerivativesWeights[i][j][k] = (partialDerivativesWeights[i][j][k] / input.Length) + _lambda * _network[i][j][k];
                     }
                     partialDerivativesBias[i][j] = partialDerivativesBias[i][j] / input.Length;
                 }
             }
 
             return Tuple.Create(partialDerivativesWeights, partialDerivativesBias);
+        }
+
+        private void CheckGradient(double[][] input, Tuple<double[][][], double[][]> gradient)
+        {
+            double[][][] gradientWeights = new double[_network.LayerCount][][];
+            double[][] gradientBias = new double[_network.LayerCount][];
+            double[][] averageActivations;
+            double[][] output = new double[input.Length][];
+            double tmp;
+
+            for (int i = 0; i < _network.LayerCount; i++)
+            {
+                gradientWeights[i] = new double[_network[i].NeuronCount][];
+                gradientBias[i] = new double[_network[i].NeuronCount];
+
+                for (int j = 0; j < _network[i].NeuronCount; j++)
+                {
+                    gradientWeights[i][j] = new double[_network[i][j].InputCount];
+                }
+            }
+
+            for (int i = 0; i < _network.LayerCount; i++)
+            {
+                for (int j = 0; j < _network[i].NeuronCount; j++)
+                {
+                    tmp = _network[i][j].Bias;
+                    _network[i][j].Bias = tmp + 0.0001;
+
+                    UpdateCachedActivations(input);
+                    averageActivations = Networks.AverageActivations(_network, _cachedActivations);
+
+                    for (int k = 0; k < output.Length; k++)
+                    {
+                        output[k] = _cachedActivations[k][_network.LayerCount - 1]; 
+                    }
+
+                    gradientBias[i][j] += CostFunctions.HalfSquaredErrorL2Sparsity(_network, averageActivations[0], _sparsity, _lambda, _beta, output, input);
+
+                    _network[i][j].Bias = tmp - 0.0001;
+
+                    UpdateCachedActivations(input);
+                    averageActivations = Networks.AverageActivations(_network, _cachedActivations);
+
+                    for (int k = 0; k < output.Length; k++)
+                    {
+                        output[k] = _cachedActivations[k][_network.LayerCount - 1];
+                    }
+
+                    gradientBias[i][j] -= CostFunctions.HalfSquaredErrorL2Sparsity(_network, averageActivations[0], _sparsity, _lambda, _beta, output, input);
+
+                    _network[i][j].Bias = tmp;
+                    gradientBias[i][j] = gradientBias[i][j] / 0.0002;
+
+                    for (int k = 0; k < _network[i][j].InputCount; k++)
+                    {
+                        tmp = _network[i][j][k];
+                        _network[i][j][k] = tmp + 0.0001;
+
+                        UpdateCachedActivations(input);
+                        averageActivations = Networks.AverageActivations(_network, _cachedActivations);
+
+                        for (int l = 0; l < output.Length; l++)
+                        {
+                            output[l] = _cachedActivations[l][_network.LayerCount - 1];
+                        }
+
+                        gradientWeights[i][j][k] += CostFunctions.HalfSquaredErrorL2Sparsity(_network, averageActivations[0], _sparsity, _lambda, _beta, output, input);
+
+                        _network[i][j][k] = tmp - 0.0001;
+
+                        UpdateCachedActivations(input);
+                        averageActivations = Networks.AverageActivations(_network, _cachedActivations);
+
+                        for (int l = 0; l < output.Length; l++)
+                        {
+                            output[l] = _cachedActivations[l][_network.LayerCount - 1];
+                        }
+
+                        gradientWeights[i][j][k] -= CostFunctions.HalfSquaredErrorL2Sparsity(_network, averageActivations[0], _sparsity, _lambda, _beta, output, input);
+
+                        _network[i][j][k] = tmp;
+                        gradientWeights[i][j][k] = gradientWeights[i][j][k] / 0.0002;
+                    }
+                }
+            }
+
+            CompareGradient(gradient.Item1, gradientWeights);
+            CompareGradient(gradient.Item2, gradientBias);
+        }
+
+        private void CompareGradient(double[][][] actualGradient, double[][][] expectedGradient)
+        {
+            for (int i = 0; i < actualGradient.Length; i++)
+            {
+                for (int j = 0; j < actualGradient[i].Length; j++)
+                {
+                    for (int k = 0; k < actualGradient[i][j].Length; k++)
+                    {
+                        if (Math.Abs(actualGradient[i][j][k] - expectedGradient[i][j][k]) > 0.0000001)
+                        {
+                            Console.WriteLine("Gradient check failed. Expected {0} got {1}. Coordinates({2}, {3}, {4})",
+                                expectedGradient[i][j][k], actualGradient[i][j][k], i, j, k);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CompareGradient(double[][] actualGradient, double[][] expectedGradient)
+        {
+            for (int i = 0; i < actualGradient.Length; i++)
+            {
+                for (int j = 0; j < actualGradient[i].Length; j++)
+                {
+                    if (Math.Abs(actualGradient[i][j] - expectedGradient[i][j]) > 0.0000001)
+                    {
+                        Console.WriteLine("Gradient check failed. Expected {0} got {1}. Coordinates({2}, {3})",
+                            expectedGradient[i][j], actualGradient[i][j], i, j);
+                    }
+                }
+            }
         }
 
         public Network UpdateNetworkParameters(double[][][] weightGradients, double[][] biasGradients)
@@ -227,6 +350,11 @@ namespace ANN.Learning
             int layerCount = _network.LayerCount;
 
             Tuple<double[][][], double[][]> gradients = ComputeBatchPartialDerivatives(input, input);
+
+            if(_checkGradient)
+            {
+                CheckGradient(input, gradients);
+            }
 
             for (int i = 0; i < output.Length; i++)
             {

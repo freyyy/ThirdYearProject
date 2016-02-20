@@ -77,7 +77,7 @@ namespace AutoencoderDemo
             int epoch = 0;
 
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 500, 8);
+            double[][] patches = GetPatches(samples, 512, 512, 10, 8);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
@@ -85,9 +85,9 @@ namespace AutoencoderDemo
             Layer layer1 = new Layer(25, 64, f);
             Layer layer2 = new Layer(64, 25, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 500, 5, 0.0001, 0.01, 3);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10, 0.5, 0.0001, 0.01, 3, true);
 
-            while (epoch < 20000)
+            while (epoch < 400)
             {
                 error = sae.RunEpoch(patches);
                 epoch++;
