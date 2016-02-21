@@ -56,18 +56,18 @@ namespace ANN.Learning
                 throw new ArgumentException("Input size must match the batch size exactly.");
             }
 
-            for (int i = 0; i < input.Length; i++)
+            Parallel.For(0, input.Length, i =>
             {
-                _network.Update(input[i]);
+                double[][] output = _network.ComputeNeuronOutputs(input[i]);
 
                 for (int j = 0; j < _network.LayerCount; j++)
                 {
                     for (int k = 0; k < _network[j].NeuronCount; k++)
                     {
-                        _cachedActivations[i][j][k] = _network[j][k].Output;
+                        _cachedActivations[i][j][k] = output[j][k];
                     }
                 }
-            }
+            });
 
             return _cachedActivations;
         }
