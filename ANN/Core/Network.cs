@@ -33,12 +33,26 @@
         {
             double[] output = input;
 
-            for (int i = 0; i < _layers.Length; i++)
+            for (int i = 0; i < _layerCount; i++)
             {
                 output = _layers[i].Update(output);
             }
 
             _output = output;
+
+            return output;
+        }
+
+        public double[][] ComputeNeuronOutputs(double[] input)
+        {
+            double[][] output = new double[_layerCount][];
+
+            output[0] = _layers[0].Update(input);
+
+            for (int i = 1; i < _layerCount; i++)
+            {
+                output[i] = _layers[i].Update(output[i - 1]);
+            }
 
             return output;
         }
