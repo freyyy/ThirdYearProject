@@ -80,7 +80,11 @@ namespace ANN.Core
 
         public double Update(double[] input)
         {
-            return _output = _function.Output(Activation(input));
+            double output = _function.Output(Activation(input));
+
+            _output = output;
+
+            return output;
         }
     }
 }

@@ -49,12 +49,14 @@ namespace ANN.Core
         {
             double[] output = new double[NeuronCount];
 
-            Parallel.For(0, NeuronCount, i =>
+            for (int i = 0; i < NeuronCount; i++)
             {
                 output[i] = _neurons[i].Update(input);
-            });
+            }
 
-            return _output = output;
+            _output = output;
+
+            return output;
         }
     }
 }

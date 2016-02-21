@@ -38,7 +38,9 @@
                 output = _layers[i].Update(output);
             }
 
-            return _output = output;
+            _output = output;
+
+            return output;
         }
     }
 }
