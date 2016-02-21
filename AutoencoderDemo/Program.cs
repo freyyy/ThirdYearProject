@@ -77,13 +77,13 @@ namespace AutoencoderDemo
             int epoch = 0;
 
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 10, 8);
+            double[][] patches = GetPatches(samples, 512, 512, 10, 4);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(25, 64, f);
-            Layer layer2 = new Layer(64, 25, f);
+            Layer layer1 = new Layer(4, 16, f);
+            Layer layer2 = new Layer(16, 4, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
             SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10, 0.5, 0.0001, 0.01, 3, true);
 
@@ -95,7 +95,7 @@ namespace AutoencoderDemo
             }
             Console.WriteLine("Training complete after {0} epochs using the Sparse Autoencoder training regime.", epoch);
 
-            Networks.ExportHiddenWeightsToBitmap(network, 64, 64, 8, 8);
+            Networks.ExportHiddenWeightsToBitmap(network, 64, 64, 4, 4);
         }
     }
 }

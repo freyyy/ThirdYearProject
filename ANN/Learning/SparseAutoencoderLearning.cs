@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ANN.Core;
 using ANN.Utils;
 using ANN.Function;
+using System.Threading;
 
 namespace ANN.Learning
 {
@@ -155,6 +156,29 @@ namespace ANN.Learning
             return partialDerivatives;
         }
 
+        private Tuple<double[][][], double[][]> GetInitialResults()
+        {
+            int layerCount = _network.LayerCount;
+            int neuronCount, inputCount;
+            double[][][] initialDerivatives = new double[layerCount][][];
+            double[][] initialDeltas = new double[layerCount][];
+
+            for (int m = 0; m < layerCount; m++)
+            {
+                neuronCount = _network[m].NeuronCount;
+                initialDerivatives[m] = new double[neuronCount][];
+                initialDeltas[m] = new double[neuronCount];
+
+                for (int n = 0; n < neuronCount; n++)
+                {
+                    inputCount = _network[m][n].InputCount;
+                    initialDerivatives[m][n] = new double[inputCount];
+                }
+            }
+
+            return new Tuple<double[][][], double[][]>(initialDerivatives, initialDeltas);
+        }
+
         public Tuple<double[][][], double[][]> ComputeBatchPartialDerivatives(double[][] input, double[][] target)
         {
             int layerCount = Network.LayerCount;
@@ -181,14 +205,43 @@ namespace ANN.Learning
             UpdateCachedActivations(input);
             averageActivations = Networks.AverageActivations(_network, _cachedActivations);
 
-            for(int i = 0; i< input.Length; i++)
-            {
-               deltas = ComputeDeltas(i, averageActivations, target[i]);
-               tmpPartialDerivatives = ComputePartialDerivatives(i, deltas, input[i]);
+            object lockDerivatives = new object();
+            ParallelOptions options = new ParallelOptions();
+            options.MaxDegreeOfParallelism = 4;
 
-               partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, tmpPartialDerivatives);
-               partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, deltas);
-            }
+            Parallel.For(0, input.Length, options,
+                () => GetInitialResults(),
+
+                (i, loopState, partialResult) =>
+                {
+                    double[][] localDeltas = ComputeDeltas(i, averageActivations, target[i]);
+                    double[][][] localPartialDerivatives = ComputePartialDerivatives(i, localDeltas, input[i]);
+
+                    for (int j = 0; j < partialDerivativesWeights.Length; j++)
+                    {
+                        for (int k = 0; k < partialDerivativesWeights[j].Length; k++)
+                        {
+                            partialResult.Item2[j][k] += localDeltas[j][k];
+
+                            for (int l = 0; l < partialDerivativesWeights[j][k].Length; l++)
+                            {
+                                partialResult.Item1[j][k][l] += localPartialDerivatives[j][k][l];
+                            }
+                        }
+                    }
+
+                    return partialResult;
+                },
+
+                (localPartialResult) =>
+                {
+                    lock (lockDerivatives)
+                    {
+                        partialDerivativesWeights = Matrix.AddMatrices(partialDerivativesWeights, localPartialResult.Item1);
+                        partialDerivativesBias = Matrix.AddMatrices(partialDerivativesBias, localPartialResult.Item2);
+                    }
+                }
+            );
 
             for (int i = 0; i < _network.LayerCount; i++)
             {
