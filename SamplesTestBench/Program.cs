@@ -1,7 +1,11 @@
-﻿using ANN.Utils;
+﻿using ANN.Core;
+using ANN.Function;
+using ANN.Learning;
+using ANN.Utils;
 using LumenWorks.Framework.IO.Csv;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -115,19 +119,50 @@ namespace SamplesTestBench
         {
             double[][] samples = GetSamples();
 
-            //ExportToBitmap(samples, 512, 512, 512, 512, "sample");
-
-            double[][] patches = GetPatches(samples, 512, 512, 100, 8);
-
-            ExportToBitmap(patches, 8, 8, 8, 8, "patch");
+            double[][] patches = GetPatches(samples, 512, 512, 10000, 8);
 
             patches = Maths.RemoveDcComponent(patches);
-
-            ExportToBitmap(patches, 8, 8, 8, 8, "patchdc");
-
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
-            ExportToBitmap(patches, 8, 8, 8, 8, "patchdctruncate");
+            ActivationFunction f = new SigmoidFunction();
+            Layer layer1 = new Layer(25, 64, f);
+            Layer layer2 = new Layer(64, 25, f);
+            Network network = new Network(new Layer[] { layer1, layer2 });
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.02, 6);
+
+            sae.UpdateCachedActivations(patches);
+
+            double[][] averageActivations = Networks.AverageActivations(network, sae.CachedActivations);
+            double[][] output = new double[patches.Length][];
+
+            for (int i = 0; i < patches.Length; i++)
+            {
+                output[i] = new double[network[network.LayerCount - 1].NeuronCount];
+
+                for (int j = 0; j < output[i].Length; j++)
+                {
+                    output[i][j] = sae.CachedActivations[i][network.LayerCount - 1][j];
+                }
+            }
+
+            Stopwatch stopwatch = new Stopwatch();
+
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    stopwatch.Start();
+            //    CostFunctions.ParallelHalfSquaredErrorL2Sparsity(network, averageActivations[0], sae.Sparsity, sae.Lambda, sae.Beta, output, patches);
+            //    stopwatch.Stop();
+            //    Console.WriteLine("Parallel cost function comuted in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+
+            //    stopwatch.Reset();
+
+            //    stopwatch.Start();
+            //    CostFunctions.HalfSquaredErrorL2Sparsity(network, averageActivations[0], sae.Sparsity, sae.Lambda, sae.Beta, output, patches);
+            //    stopwatch.Stop();
+            //    Console.WriteLine("Sequential cost function comuted in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+
+            //    stopwatch.Reset();
+            //}
         }
     }
 }

@@ -75,7 +75,7 @@ namespace ANN.Core
 
         public double Activation(double[] input)
         {
-            return Vector.DotProduct(input, _weights) + _bias;
+            return Vectors.DotProduct(input, _weights) + _bias;
         }
 
         public double Update(double[] input)

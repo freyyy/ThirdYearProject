@@ -75,7 +75,7 @@ namespace ANN.Learning
                 }
             }
 
-            func = CostFunctions.HalfSquaredErrorL2Sparsity(_sparseAutoencoder.Network, averageActivations[0], _sparseAutoencoder.Sparsity, _sparseAutoencoder.Lambda, _sparseAutoencoder.Beta, output, _input);
+            func = CostFunctions.ParallelHalfSquaredErrorL2Sparsity(_sparseAutoencoder.Network, averageActivations[0], _sparseAutoencoder.Sparsity, _sparseAutoencoder.Lambda, _sparseAutoencoder.Beta, output, _input);
         }
 
         public void FunctionValueAndGradient(double[] x, ref double func, double[] grad, object obj)

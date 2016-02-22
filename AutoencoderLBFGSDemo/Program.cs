@@ -84,7 +84,7 @@ namespace AutoencoderLBFGSDemo
             Layer layer1 = new Layer(25, 64, f);
             Layer layer2 = new Layer(64, 25, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.05, 6);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.02, 6);
             SparseAutoencoderAdapter saeAdapter = new SparseAutoencoderAdapter(sae, patches);
 
             double[] x = saeAdapter.GetFunctionParameters();
@@ -95,7 +95,7 @@ namespace AutoencoderLBFGSDemo
             alglib.minlbfgsstate state;
             alglib.minlbfgsreport rep;
 
-            alglib.minlbfgscreate(3, x, out state);
+            alglib.minlbfgscreate(5, x, out state);
             alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
             alglib.minlbfgssetxrep(state, true);
             alglib.minlbfgsoptimize(state, saeAdapter.FunctionValueAndGradient, saeAdapter.PrintProgress, null);

@@ -97,22 +97,26 @@ namespace ANN.Learning
                 deltas[i] = new double[_network[i].NeuronCount];
             }
 
-            deltas[layerCount - 1] = target.Zip(output, (t, o) => (-1) * (t - o) * o * (1 - o)).ToArray();
+            for (int i = 0; i < target.Length; i++)
+            {
+                deltas[layerCount - 1][i] = (-1) * (target[i] - output[i]) * output[i] * (1 - output[i]);
+            }
 
             for (int i = layerCount - 2; i >= 0; i--)
             {
                 double[] prevDeltas = deltas[i + 1];
-                double[] weights = new double[prevDeltas.Length];
 
                 for (int j = 0; j < _network[i].NeuronCount; j++)
                 {
                     double neuronOutput = _cachedActivations[batchIndex][i][j];
 
-                    for (int k = 0; k < weights.Length; k++)
+                    for (int k = 0; k < prevDeltas.Length; k++)
                     {
-                        weights[k] = _network[i + 1][k][j];
+                        deltas[i][j] += _network[i + 1][k][j] * prevDeltas[k];
                     }
-                    deltas[i][j] = (weights.Zip(prevDeltas, (w, d) => w * d).Sum() + _beta * Maths.KLDivergenceDelta(_sparsity, averageActivations[i][j])) * neuronOutput * (1 - neuronOutput);
+
+                    deltas[i][j] += _beta * Maths.KLDivergenceDelta(_sparsity, averageActivations[i][j]);
+                    deltas[i][j] *= neuronOutput * (1 - neuronOutput);
                 }
             }
 
@@ -207,7 +211,7 @@ namespace ANN.Learning
 
             object lockDerivatives = new object();
             ParallelOptions options = new ParallelOptions();
-            options.MaxDegreeOfParallelism = 4;
+            //options.MaxDegreeOfParallelism = 4;
 
             Parallel.For(0, input.Length, options,
                 () => GetInitialResults(),
