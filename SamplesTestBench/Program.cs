@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -163,6 +164,33 @@ namespace SamplesTestBench
 
             //    stopwatch.Reset();
             //}
+            Console.WriteLine("SIMD length {0}", Vector<double>.Count);
+            Console.WriteLine("Hardware acceleration {0}", Vector.IsHardwareAccelerated);
+
+            int stride = Vector<double>.Count;
+
+            stopwatch.Start();
+            for (int i = 0; i < patches.Length; i++)
+            {
+                double result = 0;
+                for (int j = 0; j < patches[i].Length; j += stride)
+                {
+                    Vector<double> va = new Vector<double>(patches[i], j);
+                    Vector<double> vb = new Vector<double>(network[0][0].Weights, j);
+                    result += Vector.Dot(va, vb);
+                }
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+
+            stopwatch.Start();
+            for (int i = 0; i < patches.Length; i++)
+            {
+                double result = Vectors.DotProduct(patches[i], network[0][0].Weights);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
         }
     }
 }

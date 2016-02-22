@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -75,6 +76,7 @@ namespace AutoencoderLBFGSDemo
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("Vector hardware acceleration enabled: {0}", Vector.IsHardwareAccelerated);
             double[][] samples = GetSamples();
             double[][] patches = GetPatches(samples, 512, 512, 10000, 8);
             patches = Maths.RemoveDcComponent(patches);

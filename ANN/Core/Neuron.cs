@@ -1,6 +1,7 @@
 ﻿using System;
 using ANN.Function;
 using ANN.Utils;
+using System.Numerics;
 
 namespace ANN.Core
 {
@@ -75,7 +76,25 @@ namespace ANN.Core
 
         public double Activation(double[] input)
         {
-            return Vectors.DotProduct(input, _weights) + _bias;
+            double result = 0;
+            int simdLength = Vector<double>.Count;
+            int length = input.Length;
+            int lengthSimd = length - (length % simdLength);
+            Vector<double> vi, vw;
+
+            for (int i = 0; i < lengthSimd; i += simdLength)
+            {
+                vi = new Vector<double>(input, i);
+                vw = new Vector<double>(_weights, i);
+                result += Vector.Dot(vi, vw);
+            }
+
+            for (int i = lengthSimd; i < length; i++)
+            {
+                result += input[i] * _weights[i];
+            }
+
+            return result + _bias;
         }
 
         public double Update(double[] input)
