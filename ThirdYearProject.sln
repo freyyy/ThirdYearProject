@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlglibTestBench", "AlglibTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoencoderLBFGSDemo", "AutoencoderLBFGSDemo\AutoencoderLBFGSDemo.csproj", "{00241090-95B3-4E9F-B7FC-9D18A88BA340}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumericsTestBench", "NumericsTestBench\NumericsTestBench.csproj", "{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,18 @@ Global
 		{00241090-95B3-4E9F-B7FC-9D18A88BA340}.Release|x64.Build.0 = Release|Any CPU
 		{00241090-95B3-4E9F-B7FC-9D18A88BA340}.Release|x86.ActiveCfg = Release|Any CPU
 		{00241090-95B3-4E9F-B7FC-9D18A88BA340}.Release|x86.Build.0 = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|x64.Build.0 = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Debug|x86.Build.0 = Debug|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|x64.ActiveCfg = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|x64.Build.0 = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|x86.ActiveCfg = Release|Any CPU
+		{76C9F1DC-541A-4CA0-9C78-A618D274DB8D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
