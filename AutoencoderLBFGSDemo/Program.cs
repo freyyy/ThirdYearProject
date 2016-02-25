@@ -76,17 +76,17 @@ namespace AutoencoderLBFGSDemo
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Vector hardware acceleration enabled: {0}", Vector.IsHardwareAccelerated);
+            Console.WriteLine("Hardware acceleration enabled: {0}", Vector.IsHardwareAccelerated);
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 10000, 8);
+            double[][] patches = GetPatches(samples, 512, 512, 1000, 28);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(25, 64, f);
-            Layer layer2 = new Layer(64, 25, f);
+            Layer layer1 = new Layer(196, 784, f);
+            Layer layer2 = new Layer(784, 196, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 10000, 1, 0.0002, 0.02, 6);
+            SparseAutoencoderLearning sae = new SparseAutoencoderLearning(network, 1000, 1, 0.0003, 0.1, 3);
             SparseAutoencoderAdapter saeAdapter = new SparseAutoencoderAdapter(sae, patches);
 
             double[] x = saeAdapter.GetFunctionParameters();
@@ -106,7 +106,7 @@ namespace AutoencoderLBFGSDemo
             Console.WriteLine("{0}", rep.terminationtype);
             //Console.WriteLine("{0}", alglib.ap.format(x, 2));
 
-            Networks.ExportHiddenWeightsToBitmap(network, 128, 128, 8, 8);
+            Networks.ExportHiddenWeightsToBitmap(network, 784, 784, 784, 784);
         }
     }
 }

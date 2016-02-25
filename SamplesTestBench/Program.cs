@@ -118,6 +118,7 @@ namespace SamplesTestBench
 
         public static void Main(string[] args)
         {
+            Console.WriteLine("Vector hardware acceleration enabled: {0}", Vector.IsHardwareAccelerated);
             double[][] samples = GetSamples();
 
             double[][] patches = GetPatches(samples, 512, 512, 10000, 8);
@@ -164,33 +165,157 @@ namespace SamplesTestBench
 
             //    stopwatch.Reset();
             //}
-            Console.WriteLine("SIMD length {0}", Vector<double>.Count);
-            Console.WriteLine("Hardware acceleration {0}", Vector.IsHardwareAccelerated);
+            //Console.WriteLine("SIMD length {0}", Vector<double>.Count);
+            //Console.WriteLine("Hardware acceleration {0}", Vector.IsHardwareAccelerated);
 
-            int stride = Vector<double>.Count;
+            //int stride = Vector<double>.Count;
+
+            //stopwatch.Start();
+            //for (int k = 0; k < 5000; k++)
+            //{
+            //    for (int i = 0; i < patches.Length; i++)
+            //    {
+            //        double result = 0;
+            //        for (int j = 0; j < patches[i].Length; j += stride)
+            //        {
+            //            Vector<double> va = new Vector<double>(patches[i], j);
+            //            Vector<double> vb = new Vector<double>(network[0][0].Weights, j);
+            //            result += Vector.Dot(va, vb);
+            //        }
+            //    }
+            //}
+            //stopwatch.Stop();
+            //Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            //stopwatch.Reset();
+
+            //stopwatch.Start();
+            //for (int k = 0; k < 5000; k++)
+            //{
+            //    for (int i = 0; i < patches.Length; i++)
+            //    {
+            //        double result = 0;
+            //        for (int j = 0; j < patches[i].Length; j++)
+            //        {
+            //            result += patches[i][j] * network[0][0].Weights[j];
+            //        }
+            //    }
+            //}
+            //stopwatch.Stop();
+            //Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            //stopwatch.Reset();
+
+            //for (int k = 0; k < 100; k++)
+            //{
+            //    double[][] deltas;
+            //    stopwatch.Start();
+            //    for (int i = 0; i < patches.Length; i++)
+            //    {
+            //        deltas = sae.ComputeDeltas(i, averageActivations, patches[i]);
+            //        sae.ComputePartialDerivatives(i, deltas, patches[i]);
+            //    }
+            //    stopwatch.Stop();
+            //    Console.WriteLine("Deltas and derivatives computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            //    stopwatch.Reset();
+            //}
+
+            //double[] result = new double[64];
+
+            //stopwatch.Start();
+            //for (int k = 0; k < 5000; k++)
+            //{
+            //    for (int i = 0; i < patches.Length; i++)
+            //    {
+            //        for (int j = 0; j < patches[i].Length; j++)
+            //        {
+            //            result[j] = (-1) * (patches[i][j] - patches[i][j]) * patches[i][j] * (1 - patches[i][j]);
+            //        }
+            //    }
+            //}
+            //stopwatch.Stop();
+            //Console.WriteLine("Sequential computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            //stopwatch.Reset();
+
+            //stopwatch.Start();
+            //for (int k = 0; k < 5000; k++)
+            //{
+            //    for (int i = 0; i < patches.Length; i++)
+            //    {
+            //        int simd = Vector<double>.Count;
+            //        int length = patches[i].Length;
+            //        int lengthSimd = length - (length % simd);
+
+            //        for (int j = 0; j < lengthSimd; j += simd)
+            //        {
+            //            Vector<double> va = new Vector<double>(patches[i], j);
+            //            Vector<double> vb = new Vector<double>(patches[i], j);
+            //            va = (va - vb) * vb * (Vector<double>.One - vb);
+            //            va.CopyTo(result, j);
+            //        }
+
+            //        for (int j = lengthSimd; j < length; j++)
+            //        {
+            //            result[j] = (-1) * (patches[i][j] - patches[i][j]) * patches[i][j] * (1 - patches[i][j]);
+            //        }
+            //    }
+            //}
+            //stopwatch.Stop();
+            //Console.WriteLine("SIMD computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+
+            double result = 0;
 
             stopwatch.Start();
-            for (int i = 0; i < patches.Length; i++)
+            for (int l = 0; l < 10000; l++)
             {
-                double result = 0;
-                for (int j = 0; j < patches[i].Length; j += stride)
+                for (int i = 0; i < network.LayerCount; i++)
                 {
-                    Vector<double> va = new Vector<double>(patches[i], j);
-                    Vector<double> vb = new Vector<double>(network[0][0].Weights, j);
-                    result += Vector.Dot(va, vb);
+                    int neuronCount = network[i].NeuronCount;
+
+                    for (int j = 0; j < neuronCount; j++)
+                    {
+                        int inputCount = network[i][j].InputCount;
+
+                        for (int k = 0; k < inputCount; k++)
+                        {
+                            result += patches[i][j] * patches[i][j];
+                        }
+                    }
                 }
             }
             stopwatch.Stop();
-            Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            Console.WriteLine("Sequential computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
             stopwatch.Reset();
 
+
+            int simd = Vector<double>.Count;
+            int length, lengthSimd;
+            Vector<double> va, vb;
+
             stopwatch.Start();
-            for (int i = 0; i < patches.Length; i++)
+            for (int l = 0; l < 10000; l++)
             {
-                double result = Vectors.DotProduct(patches[i], network[0][0].Weights);
+                for (int i = 0; i < network.LayerCount; i++)
+                {
+                    int neuronCount = network[i].NeuronCount;
+
+                    for (int j = 0; j < neuronCount; j++)
+                    {
+                        int inputCount = network[i][j].InputCount;
+
+                        length = inputCount;
+                        lengthSimd = inputCount - (inputCount % simd);
+
+                        for (int k = 0; k < lengthSimd; k += simd)
+                        {
+                            va = new Vector<double>(patches[i], k);
+                            vb = new Vector<double>(patches[i], k);
+                            result += Vector.Dot(va, vb);
+                        }
+                    }
+                }
             }
             stopwatch.Stop();
-            Console.WriteLine("Activations computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            Console.WriteLine("SIMD computed in {0} milliseconds", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
         }
     }
 }
