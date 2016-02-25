@@ -67,12 +67,12 @@ namespace ANN.Learning
             return x.Map(y => 1 / (1 + Math.Exp(-y)));
         }
 
-        private void ComputeKLDelta()
+        public void ComputeKLDelta()
         {
             kl = averageHidden.Map(y => Maths.KLDivergenceDelta(_sparsity, y));
         }
 
-        private void ComputeAverages()
+        public void ComputeAverages()
         {
             averageHidden = hidden.RowSums() / hidden.ColumnCount;
         }
@@ -81,10 +81,15 @@ namespace ANN.Learning
         {
             Vector<double>[] xMatrix = new Vector<double>[c];
 
+            for (int i = 0; i < c; i++)
+            {
+                xMatrix[i] = Vector<double>.Build.DenseOfVector(x);
+            }
+
             return M.DenseOfColumnVectors(xMatrix);
         }
 
-        private void ComputeActivations(Matrix<double> x)
+        public void ComputeActivations(Matrix<double> x)
         {
             Matrix<double> z1, z2;
 
@@ -94,7 +99,7 @@ namespace ANN.Learning
             output = ComputeSigmoidFunction(z2);
         }
 
-        public void ComputePartialDerivatives(double[][] averageActivations, Matrix<double> input, Matrix<double> target)
+        public void ComputePartialDerivatives(Matrix<double> input, Matrix<double> target)
         {
             int batchSize = input.ColumnCount;
             Matrix<double> delta1, delta2, nablaB1, nablaB2;
