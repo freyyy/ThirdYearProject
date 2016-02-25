@@ -1,4 +1,5 @@
 ﻿using ANN.Core;
+using ANN.Function;
 using ANN.Utils;
 using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
@@ -25,8 +26,8 @@ namespace ANN.Learning
         private Vector<double> gradB1, gradB2;
         private Matrix<double> w1, w2;
         private Matrix<double> gradW1, gradW2;
-        private Matrix<double> hidden, output, kl;
-        private Matrix<double> averageHidden;
+        private Matrix<double> hidden, output;
+        private Vector<double> averageHidden, kl;
 
         public SparseAutoencoderMatrixLearning(Network network, double lambda, double sparsity, double beta, bool checkGradient = false)
         {
@@ -61,20 +62,50 @@ namespace ANN.Learning
             b2 = V.DenseOfArray(row);
         }
 
-        public void ComputeBatchPartialDerivatives(double[][] averageActivations, double[,] inputArray, double[,] targetArray)
+        private Matrix<double> ComputeSigmoidFunction(Matrix<double> x)
         {
-            int batchSize = inputArray.Length;
+            return x.Map(y => 1 / (1 + Math.Exp(-y)));
+        }
 
-            Matrix<double> target = Matrix<double>.Build.DenseOfArray(targetArray);
-            Matrix<double> input = Matrix<double>.Build.DenseOfArray(inputArray);
+        private void ComputeKLDelta()
+        {
+            kl = averageHidden.Map(y => Maths.KLDivergenceDelta(_sparsity, y));
+        }
 
-            Matrix<double> delta2 = -(target - output).PointwiseMultiply(output).PointwiseMultiply(1 - output);
-            Matrix<double> delta1 = (w2.Transpose() * delta2 + _beta * kl).PointwiseMultiply(hidden).PointwiseMultiply(1 - hidden);
+        private void ComputeAverages()
+        {
+            averageHidden = hidden.RowSums() / hidden.ColumnCount;
+        }
+
+        private Matrix<double> ExpandColumn(Vector<double> x, int c)
+        {
+            Vector<double>[] xMatrix = new Vector<double>[c];
+
+            return M.DenseOfColumnVectors(xMatrix);
+        }
+
+        private void ComputeActivations(Matrix<double> x)
+        {
+            Matrix<double> z1, z2;
+
+            z1 = w1 * x + ExpandColumn(b1, x.ColumnCount);
+            hidden = ComputeSigmoidFunction(z1);
+            z2 = w2 * hidden + ExpandColumn(b2, x.ColumnCount);
+            output = ComputeSigmoidFunction(z2);
+        }
+
+        public void ComputePartialDerivatives(double[][] averageActivations, Matrix<double> input, Matrix<double> target)
+        {
+            int batchSize = input.ColumnCount;
+            Matrix<double> delta1, delta2, nablaB1, nablaB2;
+
+            delta2 = -(target - output).PointwiseMultiply(output).PointwiseMultiply(1 - output);
+            delta1 = (w2.Transpose() * delta2 + _beta * ExpandColumn(kl, input.ColumnCount)).PointwiseMultiply(hidden).PointwiseMultiply(1 - hidden);
 
             gradW2 = delta2 * hidden.Transpose();
-            Matrix<double> nablaB2 = delta2;
+            nablaB2 = delta2;
             gradW1 = delta1 * input.Transpose();
-            Matrix<double> nablaB1 = delta1;
+            nablaB1 = delta1;
 
             gradW2 = gradW2 / batchSize + _lambda * w2;
             gradW1 = gradW1 / batchSize + _lambda * w1;
