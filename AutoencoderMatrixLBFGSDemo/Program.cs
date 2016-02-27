@@ -86,40 +86,39 @@ namespace AutoencoderMatrixLBFGSDemo
             Console.WriteLine("Setting up experiment");
 
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 10000, 28);
+            double[][] patches = GetPatches(samples, 512, 512, 10000, 10);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(196, 784, f);
-            Layer layer2 = new Layer(784, 196, f);
+            Layer layer1 = new Layer(100, 100, f);
+            Layer layer2 = new Layer(100, 100, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0003, 0.1, 3);
+            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0001, 0.01, 3);
 
             Matrix<double> input = ConvertPatchesToMatrix(patches);
 
-            Console.WriteLine("Computing activations");
-            s.Start();
-            saem.ComputeActivations(input);
-            Console.WriteLine("Activations computed in {0} milliseconds", s.ElapsedMilliseconds);
+            SparseAutoencoderMatrixAdapter saemAdapter = new SparseAutoencoderMatrixAdapter(saem, input, input);
 
-            Console.WriteLine("Computing average activations");
-            s.Restart();
-            saem.ComputeAverages();
-            Console.WriteLine("Average Activations computed in {0} milliseconds", s.ElapsedMilliseconds);
+            double[] x = saem.ParametersArray();
+            double epsg = 0.0000000001;
+            double epsf = 0;
+            double epsx = 0;
+            int maxits = 400;
+            alglib.minlbfgsstate state;
+            alglib.minlbfgsreport rep;
 
-            Console.WriteLine("Computing KL deltas");
-            s.Restart();
-            saem.ComputeDeltaKL();
-            Console.WriteLine("KL deltas computed in {0} milliseconds", s.ElapsedMilliseconds);
+            alglib.minlbfgscreate(5, x, out state);
+            alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
+            alglib.minlbfgssetxrep(state, true);
+            alglib.minlbfgsoptimize(state, saemAdapter.FunctionValueAndGradient, saemAdapter.PrintProgress, null);
+            alglib.minlbfgsresults(state, out x, out rep);
 
-            Console.WriteLine("Computing derivatives");
-            s.Restart();
-            saem.ComputePartialDerivatives(input, input);
-            Console.WriteLine("Derivatives computed in {0} milliseconds", s.ElapsedMilliseconds);
+            Console.WriteLine("{0}", rep.terminationtype);
+            //Console.WriteLine("{0}", alglib.ap.format(x, 2));
 
-            Console.WriteLine("Checking gradient");
-            saem.CheckGradient(input, input);
+            saem.UpdateUnderlyingNetwork();
+            Networks.ExportHiddenWeightsToBitmap(network, 100, 100, 10, 10);
         }
     }
 }

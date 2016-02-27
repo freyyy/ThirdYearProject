@@ -157,6 +157,33 @@ namespace ANN.Learning
             }
         }
 
+        public double[] ParametersArray()
+        {
+            List<double> parameters = new List<double>();
+
+            for (int i = 0; i < w1.RowCount; i++)
+            {
+                parameters.Add(b1[i]);
+
+                for (int j = 0; j < w1.ColumnCount; j++)
+                {
+                    parameters.Add(w1[i, j]);
+                }
+            }
+
+            for (int i = 0; i < w2.RowCount; i++)
+            {
+                parameters.Add(b2[i]);
+
+                for (int j = 0; j < w2.ColumnCount; j++)
+                {
+                    parameters.Add(w2[i, j]);
+                }
+            }
+
+            return parameters.ToArray();
+        }
+
         public double[] GradientArray()
         {
             List<double> gradient = new List<double>();
