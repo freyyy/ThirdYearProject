@@ -27,7 +27,7 @@ namespace ANN.Learning
         private Matrix<double> w1, w2;
         private Matrix<double> gradW1, gradW2;
         private Matrix<double> hidden, output;
-        private Vector<double> averageHidden, kl;
+        private Vector<double> averageHidden, deltaKL, kl;
 
         public SparseAutoencoderMatrixLearning(Network network, double lambda, double sparsity, double beta, bool checkGradient = false)
         {
@@ -67,9 +67,14 @@ namespace ANN.Learning
             return x.Map(y => 1 / (1 + Math.Exp(-y)));
         }
 
-        public void ComputeKLDelta()
+        public void ComputeDeltaKL()
         {
-            kl = averageHidden.Map(y => Maths.KLDivergenceDelta(_sparsity, y));
+            deltaKL = averageHidden.Map(y => Maths.KLDivergenceDelta(_sparsity, y));
+        }
+
+        public void ComputeKL()
+        {
+            kl = averageHidden.Map(y => Maths.KLDivergence(_sparsity, y));
         }
 
         public void ComputeAverages()
@@ -105,7 +110,7 @@ namespace ANN.Learning
             Matrix<double> delta1, delta2, nablaB1, nablaB2;
 
             delta2 = -(target - output).PointwiseMultiply(output).PointwiseMultiply(1 - output);
-            delta1 = (w2.Transpose() * delta2 + _beta * ExpandColumn(kl, input.ColumnCount)).PointwiseMultiply(hidden).PointwiseMultiply(1 - hidden);
+            delta1 = (w2.Transpose() * delta2 + _beta * ExpandColumn(deltaKL, input.ColumnCount)).PointwiseMultiply(hidden).PointwiseMultiply(1 - hidden);
 
             gradW2 = delta2 * hidden.Transpose();
             nablaB2 = delta2;
@@ -116,6 +121,20 @@ namespace ANN.Learning
             gradW1 = gradW1 / batchSize + _lambda * w1;
             gradB2 = nablaB2.RowSums() / batchSize;
             gradB1 = nablaB1.RowSums() / batchSize;
+        }
+
+        public double ComputeCost(Matrix<double> target)
+        {
+            double result = ((output - target).PointwisePower(2).ColumnSums() / 2).Average();
+            result += _lambda / 2 * (w1.PointwisePower(2).ColumnSums().Sum() + w2.PointwisePower(2).ColumnSums().Sum());
+            result += _beta * (kl.Sum());
+
+            return result;
+        }
+
+        public void CheckGradient()
+        {
+
         }
     }
 }

@@ -86,7 +86,7 @@ namespace AutoencoderMatrixLBFGSDemo
             Console.WriteLine("Setting up experiment");
 
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 30000, 28);
+            double[][] patches = GetPatches(samples, 512, 512, 10000, 28);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
@@ -110,7 +110,7 @@ namespace AutoencoderMatrixLBFGSDemo
 
             Console.WriteLine("Computing KL deltas");
             s.Restart();
-            saem.ComputeKLDelta();
+            saem.ComputeDeltaKL();
             Console.WriteLine("KL deltas computed in {0} milliseconds", s.ElapsedMilliseconds);
 
             Console.WriteLine("Computing derivatives");
