@@ -132,6 +132,58 @@ namespace ANN.Learning
             return result;
         }
 
+        public void UpdateWeights(double[] rawParameters)
+        {
+            int index = 0;
+
+            for (int i = 0; i < w1.RowCount; i++)
+            {
+                b1[i] = rawParameters[index++];
+
+                for (int j = 0; j < w1.ColumnCount; j++)
+                {
+                    w1[i, j] = rawParameters[index++];
+                }
+            }
+
+            for (int i = 0; i < w2.RowCount; i++)
+            {
+                b2[i] = rawParameters[index++];
+
+                for (int j = 0; j < w2.ColumnCount; j++)
+                {
+                    w2[i, j] = rawParameters[index++];
+                }
+            }
+        }
+
+        public double[] GradientArray()
+        {
+            List<double> gradient = new List<double>();
+
+            for (int i = 0; i < gradW1.RowCount; i++)
+            {
+                gradient.Add(gradB1[i]);
+
+                for (int j = 0; j < gradW1.ColumnCount; j++)
+                {
+                    gradient.Add(gradW1[i, j]);
+                }
+            }
+
+            for (int i = 0; i < gradW2.RowCount; i++)
+            {
+                gradient.Add(gradB2[i]);
+
+                for (int j = 0; j < gradW2.ColumnCount; j++)
+                {
+                    gradient.Add(gradW2[i, j]);
+                }
+            }
+
+            return gradient.ToArray();
+        }
+
         public void UpdateUnderlyingNetwork()
         {
 
@@ -282,6 +334,11 @@ namespace ANN.Learning
                         gradB2[i], gradient, i);
                 }
             }
+        }
+
+        public Network Network
+        {
+            get { return _network; }
         }
     }
 }
