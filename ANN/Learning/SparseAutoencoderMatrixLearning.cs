@@ -132,9 +132,156 @@ namespace ANN.Learning
             return result;
         }
 
-        public void CheckGradient()
+        public void UpdateUnderlyingNetwork()
         {
 
+        }
+
+        public void CheckGradient(Matrix<double> input, Matrix<double> target)
+        {
+            double tmp, gradient;
+
+            for (int i = 0; i < w1.RowCount; i++)
+            {
+                for (int j = 0; j < w1.ColumnCount; j++)
+                {
+                    tmp = w1[i, j];
+                    w1[i, j] = tmp + 0.0001;
+
+                    ComputeActivations(input);
+                    ComputeAverages();
+                    ComputeKL();
+
+                    gradient = ComputeCost(target);
+
+                    w1[i, j] = tmp - 0.0001;
+
+                    ComputeActivations(input);
+                    ComputeAverages();
+                    ComputeKL();
+
+                    gradient -= ComputeCost(target);
+                    gradient /= 0.0002;
+
+                    w1[i, j] = tmp;
+
+                    if (Math.Abs(gradW1[i, j] - gradient) > 0.0001)
+                    {
+                        Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 1 Unit {2} Input {3}",
+                            gradW1[i, j], gradient, i, j);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Gradient checking passed. Expected {0} got {1}. Layer 1 Unit {2} Input {3}",
+                            gradW1[i, j], gradient, i, j);
+                    }
+                }
+            }
+
+            for (int i = 0; i < b1.Count; i++)
+            {
+                tmp = b1[i];
+                b1[i] = tmp + 0.0001;
+
+                ComputeActivations(input);
+                ComputeAverages();
+                ComputeKL();
+
+                gradient = ComputeCost(target);
+
+                b1[i] = tmp - 0.0001;
+
+                ComputeActivations(input);
+                ComputeAverages();
+                ComputeKL();
+
+                gradient -= ComputeCost(target);
+                gradient /= 0.0002;
+
+                b1[i] = tmp;
+
+                if (Math.Abs(gradB1[i] - gradient) > 0.0001)
+                {
+                    Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 1 Unit {2} Input Bias",
+                        gradB1[i], gradient, i);
+                }
+                else
+                {
+                    Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 1 Unit {2} Input Bias",
+                        gradB1[i], gradient, i);
+                }
+            }
+
+            for (int i = 0; i < w2.RowCount; i++)
+            {
+                for (int j = 0; j < w2.ColumnCount; j++)
+                {
+                    tmp = w2[i, j];
+                    w2[i, j] = tmp + 0.0001;
+
+                    ComputeActivations(input);
+                    ComputeAverages();
+                    ComputeKL();
+
+                    gradient = ComputeCost(target);
+
+                    w2[i, j] = tmp - 0.0001;
+
+                    ComputeActivations(input);
+                    ComputeAverages();
+                    ComputeKL();
+
+                    gradient -= ComputeCost(target);
+                    gradient /= 0.0002;
+
+                    w2[i, j] = tmp;
+
+                    if (Math.Abs(gradW2[i, j] - gradient) > 0.0001)
+                    {
+                        Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 2 Unit {2} Input {3}",
+                            gradW2[i, j], gradient, i, j);
+                    }
+                    else
+                    {
+                        Console.WriteLine("Gradient checking passed. Expected {0} got {1}. Layer 2 Unit {2} Input {3}",
+                            gradW2[i, j], gradient, i, j);
+                    }
+                }
+            }
+
+            for (int i = 0; i < b2.Count; i++)
+            {
+                tmp = b2[i];
+                b2[i] = tmp + 0.0001;
+
+                ComputeActivations(input);
+                ComputeAverages();
+                ComputeKL();
+
+                gradient = ComputeCost(target);
+
+                b2[i] = tmp - 0.0001;
+
+                ComputeActivations(input);
+                ComputeAverages();
+                ComputeKL();
+
+                gradient -= ComputeCost(target);
+                gradient /= 0.0002;
+
+                b2[i] = tmp;
+
+                if (Math.Abs(gradB2[i] - gradient) > 0.0001)
+                {
+                    Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 2 Unit {2} Input Bias",
+                        gradB2[i], gradient, i);
+                }
+                else
+                {
+                    Console.WriteLine("Gradient checking failed. Expected {0} got {1}. Layer 2 Unit {2} Input Bias",
+                        gradB2[i], gradient, i);
+                }
+            }
         }
     }
 }

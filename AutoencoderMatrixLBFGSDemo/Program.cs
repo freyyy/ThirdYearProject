@@ -86,7 +86,7 @@ namespace AutoencoderMatrixLBFGSDemo
             Console.WriteLine("Setting up experiment");
 
             double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 10000, 28);
+            double[][] patches = GetPatches(samples, 512, 512, 10, 28);
             patches = Maths.RemoveDcComponent(patches);
             patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
 
@@ -117,6 +117,9 @@ namespace AutoencoderMatrixLBFGSDemo
             s.Restart();
             saem.ComputePartialDerivatives(input, input);
             Console.WriteLine("Derivatives computed in {0} milliseconds", s.ElapsedMilliseconds);
+
+            Console.WriteLine("Checking gradient");
+            saem.CheckGradient(input, input);
         }
     }
 }
