@@ -186,7 +186,25 @@ namespace ANN.Learning
 
         public void UpdateUnderlyingNetwork()
         {
+            for (int i = 0; i < w1.RowCount; i++)
+            {
+                _network[0][i].Bias = b1[i];
 
+                for (int j = 0; j < w1.ColumnCount; j++)
+                {
+                    _network[0][i][j] = w1[i, j];
+                }
+            }
+
+            for (int i = 0; i < w2.RowCount; i++)
+            {
+                _network[1][i].Bias = b2[i];
+
+                for (int j = 0; j < w2.ColumnCount; j++)
+                {
+                    _network[1][i][j] = w2[i, j];
+                }
+            }
         }
 
         public void CheckGradient(Matrix<double> input, Matrix<double> target)
