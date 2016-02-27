@@ -94,7 +94,7 @@ namespace AutoencoderMatrixLBFGSDemo
             Layer layer1 = new Layer(100, 100, f);
             Layer layer2 = new Layer(100, 100, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0001, 0.01, 3);
+            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0002, 0.01, 6);
 
             Matrix<double> input = ConvertPatchesToMatrix(patches);
 
