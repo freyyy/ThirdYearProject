@@ -72,6 +72,8 @@
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Resources\images.csv" />
+    <None Include="Resources\mnist_test.csv" />
+    <None Include="Resources\mnist_train.csv" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
