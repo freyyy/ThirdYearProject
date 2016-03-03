@@ -62,6 +62,18 @@ namespace ANN.Utils
             return weights.Select(w => w / norm).ToArray();
         }
 
+        public static double[][] ComputeMaximumActivationInput(double[][] weights)
+        {
+            double[][] result = new double[weights.Length][];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = ComputeMaximumActivationInput(weights[i]);
+            }
+
+            return result;
+        }
+
         public static void ExportHiddenWeightsToBitmap(Network network, int width, int height, int wdiv, int hdiv)
         {
             if (network.LayerCount < 1)
@@ -103,6 +115,50 @@ namespace ANN.Utils
                     bmp.Save(filename);
                 }
             }
+        }
+
+        public static void ExportFiltersToBitmap(Network network, int filtersPerRow, int filterWidth, int filterHeight, int pixelSize)
+        {
+            double[][] weights;
+            double[][] normalisedMaxActivation;
+            int[][] pixelNormalisedMaxActivation;
+            int noFilters = network[0].NeuronCount;
+            int filtersPerColumn = noFilters / filtersPerRow;
+            int value, row, column;
+
+            Bitmap bmp = new Bitmap(pixelSize * filtersPerRow * (filterWidth + 1) - 1, pixelSize * filtersPerColumn * (filterHeight + 1) - 1);
+
+            weights = new double[noFilters][];
+
+            for (int i = 0; i < noFilters; i++)
+            {
+                weights[i] = network[0][i].Weights;
+            }
+
+            normalisedMaxActivation = Maths.Rescale(ComputeMaximumActivationInput(weights), 0, 1);
+            pixelNormalisedMaxActivation = normalisedMaxActivation.Select(i => i.Select(j => (int)(j * 255)).ToArray()).ToArray();
+
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                for (int i = 0; i < noFilters; i++)
+                {
+                    column = i % filtersPerRow;
+                    row = i / filtersPerRow;
+
+                    for (int h = 0; h < filterHeight; h++)
+                    {
+                        for (int w = 0; w < filterWidth; w++)
+                        {
+                            value = pixelNormalisedMaxActivation[i][h * filterWidth + w];
+
+                            g.FillRectangle(new SolidBrush(Color.FromArgb(value, value, value)),
+                                new Rectangle((w + column * (filterWidth + 1)) * pixelSize, (h + row * (filterHeight + 1)) * pixelSize, pixelSize, pixelSize));
+                        }
+                    }
+                }
+            }
+
+            bmp.Save("filters.bmp");
         }
     }
 }

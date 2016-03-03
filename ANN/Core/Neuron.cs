@@ -19,9 +19,9 @@ namespace ANN.Core
 
         private static readonly Random rnd = new Random();
 
-        private static double MIN_WEIGHT = -Math.Sqrt(6) / Math.Sqrt(129);
+        private static double MIN_WEIGHT = -Math.Sqrt(6) / Math.Sqrt(1569);
 
-        private static double MAX_WEIGHT = Math.Sqrt(6) / Math.Sqrt(129);
+        private static double MAX_WEIGHT = Math.Sqrt(6) / Math.Sqrt(1569);
 
         public Neuron(int inputCount, ActivationFunction function)
         {

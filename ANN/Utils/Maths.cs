@@ -62,6 +62,18 @@ namespace ANN.Utils
             return input.Select(i => (i - min) * (maxValue - minValue) / (max - min) + minValue).ToArray();
         }
 
+        public static double[][] Rescale(double[][] input, double minValue, double maxValue)
+        {
+            double[][] result = new double[input.Length][];
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = Rescale(input[i], minValue, maxValue);
+            }
+
+            return result;
+        }
+
         public static double[][] TruncateAndRescale(double[][] input, double minValue, double maxValue)
         {
             double pstd;

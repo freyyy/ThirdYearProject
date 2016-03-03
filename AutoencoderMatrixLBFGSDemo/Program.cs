@@ -48,31 +48,55 @@ namespace AutoencoderMatrixLBFGSDemo
         private static double[][] GetPatches(double[][] samples, int samplesWidth, int samplesHeight, int patchesNum, int patchesSize)
         {
             List<double[]> patches = new List<double[]>();
-            int patchesPerSample = patchesNum / samples.Length;
             double[] patch;
 
-            for (int i = 0; i < samples.Length; i++)
+            for (int i = 0; i < patchesNum; i++)
             {
-                for (int j = 0; j < patchesPerSample; j++)
+                patch = new double[patchesSize * patchesSize];
+                int sample = rng.Next(0, samples.Length);
+                int leftCornerWidth = rng.Next(0, samplesWidth - patchesSize);
+                int leftCornerHeight = rng.Next(0, samplesHeight - patchesSize);
+                int leftCorner = leftCornerHeight * samplesWidth + leftCornerWidth;
+
+                for (int h = 0; h < patchesSize; h++)
                 {
-                    patch = new double[patchesSize * patchesSize];
-                    int leftCornerWidth = rng.Next(0, samplesWidth - patchesSize);
-                    int leftCornerHeight = rng.Next(0, samplesHeight - patchesSize);
-                    int leftCorner = leftCornerHeight * samplesWidth + leftCornerWidth;
-
-                    for (int h = 0; h < patchesSize; h++)
+                    for (int w = 0; w < patchesSize; w++)
                     {
-                        for (int w = 0; w < patchesSize; w++)
-                        {
-                            patch[h * patchesSize + w] = samples[i][leftCorner + w + h * samplesWidth];
-                        }
+                        patch[h * patchesSize + w] = samples[sample][leftCorner + w + h * samplesWidth];
                     }
-
-                    patches.Add(patch);
                 }
+
+                patches.Add(patch);
             }
 
             return patches.ToArray();
+        }
+
+        private static Matrix<double> GetMnistTrainSamples(int count)
+        {
+            List<double[]> samples = new List<double[]>();
+
+            using (CsvReader csv =
+                   new CsvReader(new StringReader(Properties.Resources.mnist_train), false))
+            {
+                int fieldCount = csv.FieldCount;
+
+                while (csv.ReadNextRecord())
+                {
+                    List<double> trainingExample = new List<double>();
+
+                    for (int i = 1; i < fieldCount; i++)
+                    {
+                        trainingExample.Add(double.Parse(csv[i]) / 255);
+                    }
+
+                    samples.Add(trainingExample.ToArray());
+                }
+            }
+
+            samples = samples.Take(count).ToList();
+
+            return Matrix<double>.Build.DenseOfColumnArrays(samples);
         }
 
         private static Matrix<double> ConvertPatchesToMatrix(double[][] patches)
@@ -85,26 +109,26 @@ namespace AutoencoderMatrixLBFGSDemo
             Control.UseNativeMKL();
             Console.WriteLine("Setting up experiment");
 
-            double[][] samples = GetSamples();
-            double[][] patches = GetPatches(samples, 512, 512, 10000, 10);
-            patches = Maths.RemoveDcComponent(patches);
-            patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
+            //double[][] samples = GetSamples();
+            //double[][] patches = GetPatches(samples, 512, 512, 10000, 10);
+            //patches = Maths.RemoveDcComponent(patches);
+            //patches = Maths.TruncateAndRescale(patches, 0.1, 0.9);
+            //Matrix<double> input = ConvertPatchesToMatrix(patches);
+            Matrix<double> mnist = GetMnistTrainSamples(10000);
 
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(100, 100, f);
-            Layer layer2 = new Layer(100, 100, f);
+            Layer layer1 = new Layer(196, 784, f);
+            Layer layer2 = new Layer(784, 196, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0002, 0.01, 6);
+            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.0001, 0.01, 3);
 
-            Matrix<double> input = ConvertPatchesToMatrix(patches);
-
-            SparseAutoencoderMatrixAdapter saemAdapter = new SparseAutoencoderMatrixAdapter(saem, input, input);
+            SparseAutoencoderMatrixAdapter saemAdapter = new SparseAutoencoderMatrixAdapter(saem, mnist, mnist);
 
             double[] x = saem.ParametersArray();
             double epsg = 0.0000000001;
             double epsf = 0;
             double epsx = 0;
-            int maxits = 400;
+            int maxits = 800;
             alglib.minlbfgsstate state;
             alglib.minlbfgsreport rep;
 
@@ -118,7 +142,7 @@ namespace AutoencoderMatrixLBFGSDemo
             //Console.WriteLine("{0}", alglib.ap.format(x, 2));
 
             saem.UpdateUnderlyingNetwork();
-            Networks.ExportHiddenWeightsToBitmap(network, 100, 100, 10, 10);
+            Networks.ExportFiltersToBitmap(network, 14, 28, 28, 1);
         }
     }
 }
