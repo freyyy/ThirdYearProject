@@ -187,11 +187,9 @@ namespace ANN.Learning
         {
             int layerCount = Network.LayerCount;
             int neuronCount, inputCount;
-            double[][] deltas;
             double[][] partialDerivativesBias = new double[layerCount][];
             double[][] averageActivations;
             double[][][] partialDerivativesWeights = new double[layerCount][][];
-            double[][][] tmpPartialDerivatives;
 
             for (int i = 0; i < layerCount; i++)
             {
@@ -211,7 +209,6 @@ namespace ANN.Learning
 
             object lockDerivatives = new object();
             ParallelOptions options = new ParallelOptions();
-            //options.MaxDegreeOfParallelism = 4;
 
             Parallel.For(0, input.Length, options,
                 () => GetInitialResults(),
