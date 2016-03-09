@@ -1,14 +1,19 @@
 ﻿using ANN.Core;
+using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace ANN.Utils
 {
     public static class Networks
     {
+        public static Random rng = new Random();
+
         public static double WeightsSum(Network network)
         {
             double result = 0;
@@ -74,47 +79,76 @@ namespace ANN.Utils
             return result;
         }
 
-        public static void ExportHiddenWeightsToBitmap(Network network, int width, int height, int wdiv, int hdiv)
+        public static void ExportParametersToText(Network network)
         {
-            if (network.LayerCount < 1)
+            XmlSerializer xmlSerialiser = new XmlSerializer(typeof(double[][][]));
+
+            double[][][] parameters = new double[network.LayerCount][][];
+
+            for (int i = 0; i < parameters.Length; i++)
             {
-                throw new ArgumentException("The network does not contain any layers");
+                parameters[i] = new double[network[i].NeuronCount][];
+
+                for (int j = 0; j < parameters[i].Length; j++)
+                {
+                    parameters[i][j] = network[i][j].Weights;
+                }
             }
 
-            double[] normalisedMaxActivation;
-            int[] intNormalisedMaxActivation;
-            int value;
-            int wstep = width / wdiv;
-            int hstep = height / hdiv;
-            string filename;
-            Bitmap bmp;
-
-            for (int i = 0; i < network.LayerCount - 1; i++)
+            using (StreamWriter writer = new StreamWriter("parameters.txt"))
             {
-                for (int j = 0; j < network[i].NeuronCount; j++)
+                xmlSerialiser.Serialize(writer, parameters);
+            }
+        }
+
+        public static void ExportReconstructionsToBitmap(Network network, Matrix<double> data, int dataPerRow, int dataPerColumn, int dataWidth, int dataHeight, int pixelSize)
+        {
+            int count = dataPerRow * dataPerColumn;
+            double[][] input = new double[count][];
+            double[][] output = new double[count][];
+
+            Bitmap bmpInput = new Bitmap(pixelSize * dataPerRow * (dataWidth + 1) - 1, pixelSize * dataPerColumn * (dataHeight + 1) - 1);
+            Bitmap bmpOutput = new Bitmap(pixelSize * dataPerRow * (dataWidth + 1) - 1, pixelSize * dataPerColumn * (dataHeight + 1) - 1);
+
+            for (int i = 0; i < count; i++)
+            {
+                int j = rng.Next(0, data.ColumnCount);
+
+                input[i] = data.Column(j).ToArray();
+                output[i] = network.Update(input[i]);
+            }
+
+            input = Maths.Rescale(input, 0, 1);
+            output = Maths.Rescale(output, 0, 1);
+
+            using (Graphics gi = Graphics.FromImage(bmpInput))
+            {
+                using (Graphics go = Graphics.FromImage(bmpOutput))
                 {
-                    bmp = new Bitmap(width, height);
-
-                    normalisedMaxActivation = Maths.Rescale(ComputeMaximumActivationInput(network[i][j].Weights), 0, 1);
-                    intNormalisedMaxActivation = normalisedMaxActivation.Select(n => (int)(n * 255)).ToArray();
-
-                    using (Graphics g = Graphics.FromImage(bmp))
+                    for (int row = 0; row < dataPerRow; row++)
                     {
-                        for (int h = 0; h < hdiv; h++)
+                        for (int col = 0; col < dataPerColumn; col++)
                         {
-                            for (int w = 0; w < wdiv; w++)
+                            for (int h = 0; h < dataHeight; h++)
                             {
-                                value = intNormalisedMaxActivation[w + h * wdiv];
-                                g.FillRectangle(new SolidBrush(Color.FromArgb(value, value, value)),
-                                    new Rectangle((wdiv - w - 1) * wstep, (hdiv - h - 1) * hstep, wstep, hstep));
+                                for (int w = 0; w < dataWidth; w++)
+                                {
+                                    int valueInput = (int)(input[row + col * dataPerRow][w + h * dataWidth] * 255);
+                                    int valueOutput = (int)(output[row + col * dataPerRow][w + h * dataWidth] * 255);
+
+                                    gi.FillRectangle(new SolidBrush(Color.FromArgb(valueInput, valueInput, valueInput)),
+                                        new Rectangle((w + col * (dataWidth + 1)) * pixelSize, (h + row * (dataHeight + 1)) * pixelSize, pixelSize, pixelSize));
+                                    go.FillRectangle(new SolidBrush(Color.FromArgb(valueOutput, valueOutput, valueOutput)),
+                                        new Rectangle((w + col * (dataWidth + 1)) * pixelSize, (h + row * (dataHeight + 1)) * pixelSize, pixelSize, pixelSize));
+                                }
                             }
                         }
                     }
-
-                    filename = string.Format("layer{0}_unit{1}.bmp", i, j);
-                    bmp.Save(filename);
                 }
             }
+
+            bmpInput.Save("input.bmp");
+            bmpOutput.Save("output.bmp");
         }
 
         public static void ExportFiltersToBitmap(Network network, int filtersPerRow, int filterWidth, int filterHeight, int pixelSize)
