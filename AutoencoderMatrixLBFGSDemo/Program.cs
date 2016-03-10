@@ -254,7 +254,7 @@ namespace AutoencoderMatrixLBFGSDemo
 
             Console.WriteLine("Begin training and optimisation");
             alglib.minlbfgscreate(lbfgsCorrs, x, out state);
-            alglib.minlbfgssetcond(state, lbfgsEpsg, lbfgsEpsg, lbfgsEpsx, lbfgsMaxIts);
+            alglib.minlbfgssetcond(state, lbfgsEpsg, lbfgsEpsf, lbfgsEpsx, lbfgsMaxIts);
             alglib.minlbfgssetxrep(state, true);
             alglib.minlbfgsoptimize(state, saemAdapter.FunctionValueAndGradient, saemAdapter.PrintProgress, null);
             alglib.minlbfgsresults(state, out x, out rep);
