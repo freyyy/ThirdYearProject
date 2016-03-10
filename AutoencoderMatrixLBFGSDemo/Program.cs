@@ -7,6 +7,7 @@ using MathNet.Numerics;
 using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -19,6 +20,36 @@ namespace AutoencoderMatrixLBFGSDemo
     {
         public static Random rng = new Random();
         public static Stopwatch s = new Stopwatch();
+
+        private static string dataSet;
+        private static int dataSetSamples;
+        private static int dataSetSamplesSize;
+
+        private static int inputLayerNodes;
+        private static int hiddenLayerNodes;
+        private static int outputLayerNodes;
+
+        private static double lambda;
+        private static double sparsity;
+        private static double beta;
+
+        private static double lbfgsEpsg;
+        private static double lbfgsEpsf;
+        private static double lbfgsEpsx;
+        private static int lbfgsMaxIts;
+        private static int lbfgsCorrs;
+
+        private static int filtersPerRow;
+        private static int filtersWidth;
+        private static int filtersHeight;
+        private static int filtersPixelSize;
+
+        private static int testSamples;
+        private static int testSamplesPerRow;
+        private static int testSamplesPerColumn;
+        private static int testSamplesWidth;
+        private static int testSamplesHeight;
+        private static int testSamplesPixelSize;
 
         private static Matrix<double> GetPatchesTrainSamples(int count, int size)
         {
@@ -124,31 +155,106 @@ namespace AutoencoderMatrixLBFGSDemo
             return Matrix<double>.Build.DenseOfColumnArrays(samples);
         }
 
+        private static void LoadExperimentParameters()
+        {
+            dataSet = ConfigurationManager.AppSettings.Get("dataSet");
+            dataSetSamples = int.Parse(ConfigurationManager.AppSettings.Get("dataSetSamples"));
+            dataSetSamplesSize = int.Parse(ConfigurationManager.AppSettings.Get("dataSetSamplesSize"));
+
+            inputLayerNodes = int.Parse(ConfigurationManager.AppSettings.Get("inputLayerNodes"));
+            hiddenLayerNodes = int.Parse(ConfigurationManager.AppSettings.Get("hiddenLayerNodes"));
+            outputLayerNodes = int.Parse(ConfigurationManager.AppSettings.Get("outputLayerNodes"));
+
+            lambda = double.Parse(ConfigurationManager.AppSettings.Get("lambda"));
+            sparsity = double.Parse(ConfigurationManager.AppSettings.Get("sparsity"));
+            beta = double.Parse(ConfigurationManager.AppSettings.Get("beta"));
+
+            lbfgsEpsg = double.Parse(ConfigurationManager.AppSettings.Get("lbfgsEpsg"));
+            lbfgsEpsf = double.Parse(ConfigurationManager.AppSettings.Get("lbfgsEpsf"));
+            lbfgsEpsx = double.Parse(ConfigurationManager.AppSettings.Get("lbfgsEpsx"));
+            lbfgsMaxIts = int.Parse(ConfigurationManager.AppSettings.Get("lbfgsMaxIts"));
+            lbfgsCorrs = int.Parse(ConfigurationManager.AppSettings.Get("lbfgsCorrs"));
+
+            filtersPerRow = int.Parse(ConfigurationManager.AppSettings.Get("filtersPerRow"));
+            filtersWidth = int.Parse(ConfigurationManager.AppSettings.Get("filtersWidth"));
+            filtersHeight = int.Parse(ConfigurationManager.AppSettings.Get("filtersHeight"));
+            filtersPixelSize = int.Parse(ConfigurationManager.AppSettings.Get("filtersPixelSize"));
+
+            testSamples = int.Parse(ConfigurationManager.AppSettings.Get("testSamples"));
+            testSamplesPerRow = int.Parse(ConfigurationManager.AppSettings.Get("testSamplesPerRow"));
+            testSamplesPerColumn = int.Parse(ConfigurationManager.AppSettings.Get("testSamplesPerColumn"));
+            testSamplesWidth = int.Parse(ConfigurationManager.AppSettings.Get("testSamplesWidth"));
+            testSamplesHeight = int.Parse(ConfigurationManager.AppSettings.Get("testSamplesHeight"));
+            testSamplesPixelSize = int.Parse(ConfigurationManager.AppSettings.Get("testSamplesPixelSize"));
+        }
+
+        private static void PrintExperimentParameters()
+        {
+            Console.WriteLine("Data set: {0}", dataSet);
+            Console.WriteLine("Data set samples: {0}", dataSetSamples);
+            Console.WriteLine("Data set samples size: {0}", dataSetSamplesSize);
+            Console.WriteLine();
+            Console.WriteLine("Network parameters");
+            Console.WriteLine("Input layer nodes: {0}", inputLayerNodes);
+            Console.WriteLine("Hidden layer nodes: {0}", hiddenLayerNodes);
+            Console.WriteLine("Output layer nodes: {0}", outputLayerNodes);
+            Console.WriteLine();
+            Console.WriteLine("Sparse autoencoder parameters");
+            Console.WriteLine("Lambda: {0}", lambda);
+            Console.WriteLine("Sparsity: {0}", sparsity);
+            Console.WriteLine("Beta: {0}", beta);
+            Console.WriteLine();
+            Console.WriteLine("L-BFGS parameters");
+            Console.WriteLine("Epsg: {0}", lbfgsEpsg);
+            Console.WriteLine("Epsf: {0}", lbfgsEpsf);
+            Console.WriteLine("Epsx: {0}", lbfgsEpsx);
+            Console.WriteLine("MaxIts: {0}", lbfgsMaxIts);
+            Console.WriteLine("Corrs: {0}", lbfgsCorrs);
+            Console.WriteLine();
+            Console.WriteLine("Filter export parameters");
+            Console.WriteLine("Filters per row: {0}", filtersPerRow);
+            Console.WriteLine("Filters width: {0}", filtersWidth);
+            Console.WriteLine("Filters height: {0}", filtersHeight);
+            Console.WriteLine("Filters pixel size: {0}", filtersPixelSize);
+            Console.WriteLine();
+            Console.WriteLine("Test export parameters");
+            Console.WriteLine("Test samples: {0}", testSamples);
+            Console.WriteLine("Test samples per row: {0}", testSamplesPerRow);
+            Console.WriteLine("Test samples per column: {0}", testSamplesPerColumn);
+            Console.WriteLine("Test samples width: {0}", testSamplesWidth);
+            Console.WriteLine("Test samples height: {0}", testSamplesHeight);
+            Console.WriteLine("Test samples pixel size: {0}", testSamplesPixelSize);
+            Console.WriteLine();
+        }
+
         public static void Main(string[] args)
         {
+            LoadExperimentParameters();
+            PrintExperimentParameters();
+
+            Console.WriteLine("Press any key to run this experiment...");
+            Console.ReadKey();
+
+            Console.WriteLine("Loading train data");
             Control.UseNativeMKL();
-            Console.WriteLine("Setting up experiment");
+            Matrix<double> input = (dataSet == "mnist" ? GetMnistTrainSamples(dataSetSamples) : GetPatchesTrainSamples(dataSetSamples, dataSetSamplesSize));
 
-            Matrix<double> input = GetMnistTrainSamples(100);
-
+            Console.WriteLine("Initializing neural network");
             ActivationFunction f = new SigmoidFunction();
-            Layer layer1 = new Layer(196, 784, f);
-            Layer layer2 = new Layer(784, 196, f);
+            Layer layer1 = new Layer(hiddenLayerNodes, inputLayerNodes, f);
+            Layer layer2 = new Layer(outputLayerNodes, hiddenLayerNodes, f);
             Network network = new Network(new Layer[] { layer1, layer2 });
-            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, 0.003, 0.1, 3);
-
+            SparseAutoencoderMatrixLearning saem = new SparseAutoencoderMatrixLearning(network, lambda, sparsity, beta);
             SparseAutoencoderMatrixAdapter saemAdapter = new SparseAutoencoderMatrixAdapter(saem, input, input);
 
+            Console.WriteLine("Initializing L-BFGS parameters");
             double[] x = saem.ParametersArray();
-            double epsg = 0.0000000001;
-            double epsf = 0;
-            double epsx = 0;
-            int maxits = 400;
             alglib.minlbfgsstate state;
             alglib.minlbfgsreport rep;
 
-            alglib.minlbfgscreate(5, x, out state);
-            alglib.minlbfgssetcond(state, epsg, epsf, epsx, maxits);
+            Console.WriteLine("Begin training and optimisation");
+            alglib.minlbfgscreate(lbfgsCorrs, x, out state);
+            alglib.minlbfgssetcond(state, lbfgsEpsg, lbfgsEpsg, lbfgsEpsx, lbfgsMaxIts);
             alglib.minlbfgssetxrep(state, true);
             alglib.minlbfgsoptimize(state, saemAdapter.FunctionValueAndGradient, saemAdapter.PrintProgress, null);
             alglib.minlbfgsresults(state, out x, out rep);
@@ -156,11 +262,24 @@ namespace AutoencoderMatrixLBFGSDemo
             Console.WriteLine("{0}", rep.terminationtype);
             //Console.WriteLine("{0}", alglib.ap.format(x, 2));
 
+            Console.WriteLine("Updating underlying network");
             saem.UpdateUnderlyingNetwork();
-            Networks.ExportFiltersToBitmap(network, 14, 28, 28, 1);
 
-            Matrix<double> test = GetMnistTestSamples(100);
-            Networks.ExportReconstructionsToBitmap(network, test, 10, 10, 28, 28, 1);
+            Console.WriteLine("Exporting network parameters");
+            Networks.ExportParametersToText(network);
+
+            Console.WriteLine("Exporting filters");
+            Networks.ExportFiltersToBitmap(network, filtersPerRow, filtersWidth, filtersHeight, filtersPixelSize);
+
+            Console.WriteLine("Loading test data");
+            Matrix<double> test = (dataSet == "mnist" ? GetMnistTestSamples(testSamples) : GetPatchesTrainSamples(testSamples, dataSetSamplesSize));
+
+            Console.WriteLine("Exporting reconstructions");
+            Networks.ExportReconstructionsToBitmap(network, test, testSamplesPerRow, testSamplesPerColumn, testSamplesWidth, testSamplesHeight, testSamplesPixelSize);
+
+            Console.WriteLine("Experiment complete");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

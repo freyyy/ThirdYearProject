@@ -112,9 +112,7 @@ namespace ANN.Utils
 
             for (int i = 0; i < count; i++)
             {
-                int j = rng.Next(0, data.ColumnCount);
-
-                input[i] = data.Column(j).ToArray();
+                input[i] = data.Column(i).ToArray();
                 output[i] = network.Update(input[i]);
             }
 
